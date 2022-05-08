@@ -20,7 +20,6 @@ void NoteV2::reset() {
     pendingPlay = false;
     disabled = true;
     output = 0;
-    printDebug = false;
 }
 
 
@@ -33,22 +32,22 @@ bool NoteV2::getDisabled(){
     return disabled;
 }
 
-int NoteV2::getIndex(){
+uint8_t NoteV2::getIndex(){
     return index;
 }
 
 
-int NoteV2::getStartTime(){
+uint8_t NoteV2::getStartTime(){
     return startTime;
 }
 
 
-int NoteV2::getEndTime(){
+uint8_t NoteV2::getEndTime(){
     return endTime;
 }
 
 
-int NoteV2::getPadId(){
+uint8_t NoteV2::getPadId(){
     return padId;
 }
 
@@ -69,15 +68,14 @@ void NoteV2::update(int time){
 }
 
 
-int NoteV2::getOutput(){
+uint8_t NoteV2::getOutput(){
     return output;
 }
 
 
-void NoteV2::startRecord(int time, int _index, int _padId, bool _printDebug){
+void NoteV2::startRecord(uint8_t time, uint8_t _index, uint8_t _padId){
     index = _index;
     padId = _padId;
-    printDebug = _printDebug;
 
     pendingRecord = true;
     startTime = time;
@@ -99,22 +97,11 @@ void NoteV2::endRecord(int time){
 
 void NoteV2::startPlay(){
     pendingPlay = true;
-    __debugPrint("Start Play: ");
-    __debugPrint(index, true);
     output = 1;
 }
 
 
 void NoteV2::endPlay(){
     pendingPlay = false;
-    __debugPrint("End Play: ");
-    __debugPrint(index, true);
     output = 0;
-}
-
-
-void NoteV2::__debugPrint(String message, bool newline){
-    if(printDebug==false) return;
-    if(newline) Serial.println(message);
-    else Serial.print(message);
 }

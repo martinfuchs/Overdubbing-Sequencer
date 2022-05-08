@@ -12,6 +12,10 @@ void States::update(){
 
 }
 
+void States::setMaxSequences(uint8_t _maxSequences){
+  maxSequences = _maxSequences;
+}
+
 // MAIN STATE
 int States::getMainState(){
     return currentMainState;
@@ -68,13 +72,13 @@ void States::setNextMenu1Selection(){
       currentSelectedSequence = 0;
   }
   if(currentMenu1Selection==MENU1_RECORD){
-      currentSelectedSequence = MAX_SEQUENCES_SELECT-1;
+      currentSelectedSequence = maxSequences-1;
   }
 
   if(currentMenu1Selection==MENU1_SEQUENCE){
     currentSelectedSequence++;
 
-    if(currentSelectedSequence>=MAX_SEQUENCES_SELECT){
+    if(currentSelectedSequence>=maxSequences){
       currentMenu1Selection++;
     }
   }else{
@@ -90,7 +94,7 @@ void States::setPrevMenu1Selection(){
       currentSelectedSequence = 0;
   }
   if(currentMenu1Selection==MENU1_RECORD){
-      currentSelectedSequence = MAX_SEQUENCES_SELECT-1;
+      currentSelectedSequence = maxSequences-1;
   }
 
   if(currentMenu1Selection==MENU1_SEQUENCE){

@@ -50,7 +50,7 @@ void SequenceV2::update(){
 
 
 int SequenceV2::getOutputValue(){
-    float finalOutputValue = sequenceOutputValue;
+    int finalOutputValue = sequenceOutputValue;
     if(liveOutputValue>sequenceOutputValue) finalOutputValue = liveOutputValue;
     return finalOutputValue;
 }
@@ -91,7 +91,7 @@ void SequenceV2::startNoteRecord(TouchPads::Touch* touch){
     NoteV2* newNote = sequence[currentNoteIndex];
     Serial.println(currentNoteIndex);
     newNote->reset();
-    newNote->startRecord(roundedTime, currentNoteIndex, touch->touchPadId, printDebug);
+    newNote->startRecord(roundedTime, currentNoteIndex, touch->touchPadId);
     pendingInputNotes[touch->touchPadId] = newNote;
 
     if(currentNoteIndex<=MAX_NOTES-2){
@@ -101,9 +101,9 @@ void SequenceV2::startNoteRecord(TouchPads::Touch* touch){
 
 
 void SequenceV2::endNoteRecord(TouchPads::Touch* touch){
+    __debugPrint("End note record");
     NoteV2* pending = pendingInputNotes[touch->touchPadId];
     pending->endRecord(roundedTime);
-    __debugPrint("End note record");
 }
 
 

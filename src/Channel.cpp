@@ -4,8 +4,9 @@
 Channel::Channel(){ 
 }
 
-void Channel::setup(int _type){
+void Channel::setup(int _type, uint8_t _numSequences){
     type = _type;
+    numSequences = _numSequences;
 
     setupEmptySequences();
     setupSequencesDisplay();
@@ -29,12 +30,12 @@ SequenceV2* Channel::getActiveSequence(){
 
 
 void Channel::setupEmptySequences(){
-    for(uint8_t i=0; i<MAX_SEQUENCES; i++){
+    for(uint8_t i=0; i<numSequences; i++){
         SequenceV2* newSequence = new SequenceV2();
         newSequence->setup(false);
-        newSequence->setNoteValueRef(notevalues);
         newSequence->setEnabled(false);
-        sequences[i] = newSequence;
+        //sequences[i] = newSequence;
+        sequences.add(newSequence);
     }
 }
 
@@ -43,7 +44,6 @@ void Channel::enableSequence(int index){
     sequence->setEnabled(true);
     sequence->play();
 }
-
 
 void Channel::disableSequence(int index){
     if(index<=0){
@@ -57,7 +57,7 @@ void Channel::disableSequence(int index){
 }
 
 bool Channel::isSequenceEnabled(int index){
-    if(index>=MAX_SEQUENCES) return false;
+    if(index>=numSequences) return false;
     return sequences[index]->getEnabled();
 }
 
@@ -88,8 +88,10 @@ void Channel::update(){
 }
 
 
-void Channel::setNoteValueRef(NoteValues *_notevalues){
-    notevalues = _notevalues;
+void Channel::setNoteValueRef(NoteValues *notevalues){
+    for(uint8_t i=0; i<numSequences; i++){
+        sequences[i]->setNoteValueRef(notevalues);
+    }
 }
 
 void Channel::updateFromTouchInput(Array<TouchPads::Touch*,NUM_TOUCHPADS> touches, bool record){
@@ -128,7 +130,7 @@ void Channel::triggerClock(){
 
 void Channel::nextSequenceIndex(){
     activeSequenceIndex++;
-    if(activeSequenceIndex>MAX_SEQUENCES-1){
+    if(activeSequenceIndex>numSequences-1){
         activeSequenceIndex = 0;
     }
 }
@@ -145,7 +147,7 @@ void Channel::nextSequence(){
 // void Channel::prevSequence(){
 //     activeSequenceIndex--;
 //     if(activeSequenceIndex<0){
-//         activeSequenceIndex = MAX_SEQUENCES-1;
+//         activeSequenceIndex = numSequences-1;
 //     }
 // }
 
@@ -160,8 +162,8 @@ int Channel::getActiveNoteValue(){
 }
 
 
-int Channel::getNumSequences(){
-    return MAX_SEQUENCES;
+uint8_t Channel::getNumSequences(){
+    return numSequences;
 }
 
 
@@ -180,7 +182,7 @@ int** Channel::getSequencesDisplay(){
     int sequenceIndex = 0;
     for(int y=0; y<2; y++){
         for(int x=0; x<5; x++){
-            if(sequenceIndex<MAX_SEQUENCES){
+            if(sequenceIndex<numSequences){
 
                 if(sequences[sequenceIndex]->getEnabled()){
                     frame[y][x] = 1;
@@ -196,12 +198,9 @@ int** Channel::getSequencesDisplay(){
                             frame[y][x] = 1;
                         }
                     }
-
                 }else{
                     frame[y][x] = 0;
                 }
-
-
             }
             sequenceIndex++;
         }

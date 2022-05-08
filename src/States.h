@@ -66,6 +66,8 @@ class States
         void setRecording(bool value);
 
         int getCurrentSelectedSequence();
+
+        void setMaxSequences(uint8_t maxSequences);
     
     private:
         void setup();
@@ -80,6 +82,7 @@ class States
         int selectedChannel = CHANNEL_GATE1;
 
         int currentSelectedSequence = 0;
+        uint8_t maxSequences = 10;
 
 };
 

@@ -5,11 +5,9 @@
 #include "Arduino.h"
 #include "NoteValues.h"
 #include "SequenceV2.h"
-#include <Array.h>
+#include <ustd_array.h>
 
-#define MAX_SEQUENCES 10
 #define NUM_TOUCHPADS 12
-
 
 class Channel
 { 
@@ -23,7 +21,7 @@ public:
     };
 
   Channel();
-  void setup(int type);
+  void setup(int type, uint8_t _numSequences=10);
   void update();
   void setNoteValueRef(NoteValues *notevalues);
   void updateFromTouchInput(Array<TouchPads::Touch*,NUM_TOUCHPADS> touches, bool record);
@@ -33,7 +31,7 @@ public:
   void resetClock();
   int** getFrameDisplay();
   int getActiveNoteValue(); // NOTE VALUE FOR DAC
-  int getNumSequences();
+  uint8_t getNumSequences();
   void triggerSequence(int sequenceIndex);
 
   //
@@ -54,11 +52,12 @@ private:
     void setupEmptySequences();
     void setupSequencesDisplay();
     SequenceV2* getActiveSequence();
-    int type = TYPE_NONE;
+    uint8_t type = TYPE_NONE;
 
     uint8_t activeSequenceIndex = 0;
 
-    Array<SequenceV2*,MAX_SEQUENCES> sequences;
+    uint8_t numSequences;
+    ustd::array<SequenceV2*> sequences;
 
     // GATES
     uint8_t Gate1_Pin = 15;
@@ -70,12 +69,9 @@ private:
     // DISPLAY
     int** frame;
 
-    // NOTEVALUES
-    NoteValues* notevalues;
-
     //
-    int blinkCounter = 0;
-    int blinkSpeed = 1;
+    uint8_t blinkCounter = 0;
+    uint8_t blinkSpeed = 1;
 
 };
 

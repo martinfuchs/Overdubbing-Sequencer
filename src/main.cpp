@@ -117,9 +117,9 @@ void setup(){
   pinMode(Reset_Pin, INPUT_PULLUP);
 
   // SEQUENCER
-  channel1.setup(0);
-  channel2.setup(1);
-  channel3.setup(2);
+  channel1.setup(0,10);
+  channel2.setup(1,10);
+  channel3.setup(2,1);
 
   //ROTARY ENCODER
   //clickEncoder.setAccelerationEnabled(true);
@@ -328,6 +328,7 @@ void button1Released(){
       states.setRecording(!states.getRecording());
     }else if(states.getMenu1State()==States::MENU1_CHANNEL){
       states.selectNextChannel();
+      states.setMaxSequences(getSelectedChannel()->getNumSequences());
     }else if(states.getMenu1State()==States::MENU1_OUTPUT){
       states.selectNextVout();
     }else if(states.getMenu1State()==States::MENU1_SEQUENCE){
