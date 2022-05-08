@@ -4,9 +4,12 @@
 Channel::Channel(){ 
 }
 
-void Channel::setup(int _type, uint8_t _numSequences){
+void Channel::setup(int _type, uint8_t _numSequences, uint8_t _numNotesPerSequences, bool _usePressure, bool _debug){
     type = _type;
     numSequences = _numSequences;
+    usePressure = _usePressure;
+    numNotesPerSequences = _numNotesPerSequences;
+    debug = _debug;
 
     setupEmptySequences();
     setupSequencesDisplay();
@@ -19,7 +22,7 @@ void Channel::setup(int _type, uint8_t _numSequences){
     }
     if(type==TYPE_ENVELOPE){
         pinMode(Pressure_Pin, OUTPUT);
-        analogWriteResolution(12);
+        //analogWriteResolution(12);
     }
 }
 
@@ -32,7 +35,7 @@ SequenceV2* Channel::getActiveSequence(){
 void Channel::setupEmptySequences(){
     for(uint8_t i=0; i<numSequences; i++){
         SequenceV2* newSequence = new SequenceV2();
-        newSequence->setup(false);
+        newSequence->setup(numNotesPerSequences, usePressure, debug);
         newSequence->setEnabled(false);
         //sequences[i] = newSequence;
         sequences.add(newSequence);
@@ -66,23 +69,23 @@ bool Channel::isSequenceEnabled(int index){
 void Channel::update(){
     getActiveSequence()->update();
 
-    int out = getActiveSequence()->getOutputValue();
+    uint8_t output = getActiveSequence()->getOutputValue();
     if(type==TYPE_GATE1){
-        if(out==1){
+        if(output==255){
             digitalWrite(Gate1_Pin, HIGH);
         }else{
             digitalWrite(Gate1_Pin, LOW);
         }
     }   
     if(type==TYPE_GATE2){
-        if(out==1){
+        if(output==255){
             digitalWrite(Gate2_Pin, HIGH);
         }else{
             digitalWrite(Gate2_Pin, LOW);
         }
     }
     if(type==TYPE_ENVELOPE){
-        analogWrite(Pressure_Pin, out);
+        analogWrite(Pressure_Pin, output);
     }
     
 }
@@ -182,6 +185,7 @@ int** Channel::getSequencesDisplay(){
     int sequenceIndex = 0;
     for(int y=0; y<2; y++){
         for(int x=0; x<5; x++){
+            frame[y][x] = 0;
             if(sequenceIndex<numSequences){
 
                 if(sequences[sequenceIndex]->getEnabled()){

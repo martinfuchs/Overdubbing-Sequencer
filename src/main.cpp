@@ -117,9 +117,10 @@ void setup(){
   pinMode(Reset_Pin, INPUT_PULLUP);
 
   // SEQUENCER
-  channel1.setup(0,10);
-  channel2.setup(1,10);
-  channel3.setup(2,1);
+  //int _type, uint8_t _numSequences, uint8_t _numNotesPerSequences, bool _usePressure, bool _debug
+  channel1.setup(0, 10, 20, false, false);
+  channel2.setup(1, 10, 20, false, false);
+  channel3.setup(2, 5, 5, true, false);
 
   //ROTARY ENCODER
   //clickEncoder.setAccelerationEnabled(true);

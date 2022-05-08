@@ -5,19 +5,27 @@ SequenceV2::SequenceV2() {
 }
 
 
-void SequenceV2::setup(bool _printDebug ){
+///////////////////
+// INIT 
+///////////////////
+
+void SequenceV2::setup(uint8_t _numNotes, bool _usePressureValues, bool _printDebug){
+    numNotes = _numNotes;
+    printDebug = _printDebug;
+    usePressureValues = _usePressureValues;
+
     setupSequenceNotes();
     setupFrameDisplay();
-    printDebug = _printDebug;
 }
 
 
 void SequenceV2::setupSequenceNotes(){
     // create empty notes
-    for(uint8_t i=0; i<MAX_NOTES; i++){
+    for(uint8_t i=0; i<numNotes; i++){
         NoteV2* tmpNote = new NoteV2();
         tmpNote->setDisabled(true);
-        sequence[i] = tmpNote;
+        //sequence[i] = tmpNote;
+        sequence.add(tmpNote);
     }
 
     for(uint8_t i=0; i<NUM_TOUCHPADS; i++){
@@ -25,36 +33,37 @@ void SequenceV2::setupSequenceNotes(){
         tmpNote->setDisabled(true);
         pendingInputNotes[i] = tmpNote;
     }
-}
 
-
-void SequenceV2::update(){
-    if(playing==false || enabled==false){
-        sequenceOutputValue = 0.0;
-        return;
-    }
-
-    unsigned long currentTime = millis();
-    unsigned long time = currentTime-startTime;
-    roundedTime = int(time*0.1);
-
-    sequenceOutputValue = 0.0;
-    for(uint8_t i=0; i<MAX_NOTES; i++){
-        sequence[i]->update(roundedTime);
-        if (sequence[i]->getDisabled() == false && sequence[i]->getOutput()>=sequenceOutputValue){
-            sequenceOutputValue = sequence[i]->getOutput();
-            sequenceOutputNoteValue = getNoteValue(sequence[i]->getPadId());
+    if(usePressureValues){
+        pressureNotes = ustd::map<uint8_t, PressureNote*>(numNotes, numNotes, 0, false);
+        for(uint8_t i=0; i<numNotes; i++){
+            PressureNote* pNote = new PressureNote();
+            pressureNotes[i] = pNote;
+            sequence[i]->setPressureNote(pNote);
         }
     }
 }
 
 
-int SequenceV2::getOutputValue(){
-    int finalOutputValue = sequenceOutputValue;
+///////////////////
+// OUTPUT 
+///////////////////
+
+uint8_t SequenceV2::getOutputValue(){
+    uint8_t finalOutputValue = sequenceOutputValue;
     if(liveOutputValue>sequenceOutputValue) finalOutputValue = liveOutputValue;
+
+    if(usePressureValues){
+        interpolatedOutputValue += (float(finalOutputValue)-interpolatedOutputValue)*0.05;
+        return uint8_t(interpolatedOutputValue);
+    }
     return finalOutputValue;
 }
 
+
+///////////////////
+// INPUT 
+///////////////////
 
 void SequenceV2::setTouchInputs(Array<TouchPads::Touch*,NUM_TOUCHPADS> touches, bool record){
     recording = record;
@@ -77,7 +86,6 @@ void SequenceV2::setTouchInputs(Array<TouchPads::Touch*,NUM_TOUCHPADS> touches, 
     }
 }
 
-
 void SequenceV2::stopPendingInputs(){
     for(uint8_t i=0; i<NUM_TOUCHPADS; i++){
         NoteV2* pending = pendingInputNotes[i];
@@ -86,15 +94,39 @@ void SequenceV2::stopPendingInputs(){
 }
 
 
+///////////////////
+// SEQUENCE 
+///////////////////
+
+void SequenceV2::update(){
+    if(playing==false || enabled==false){
+        sequenceOutputValue = 0;
+        return;
+    }
+
+    unsigned long currentTime = millis();
+    unsigned long time = currentTime-startTime;
+    roundedTime = uint32_t(time*0.1);
+
+    sequenceOutputValue = 0;
+    for(uint8_t i=0; i<numNotes; i++){
+        sequence[i]->update(roundedTime);
+        if (sequence[i]->getDisabled() == false && sequence[i]->getOutput()>=sequenceOutputValue){
+            sequenceOutputValue = sequence[i]->getOutput();
+            sequenceOutputNoteValue = getNoteValue(sequence[i]->getPadId());
+        }
+    }
+}
+
+
 void SequenceV2::startNoteRecord(TouchPads::Touch* touch){
     __debugPrint("Start note record");
     NoteV2* newNote = sequence[currentNoteIndex];
-    Serial.println(currentNoteIndex);
     newNote->reset();
     newNote->startRecord(roundedTime, currentNoteIndex, touch->touchPadId);
     pendingInputNotes[touch->touchPadId] = newNote;
 
-    if(currentNoteIndex<=MAX_NOTES-2){
+    if(currentNoteIndex<=numNotes-2){
         currentNoteIndex +=1;
     }
 }
@@ -108,23 +140,34 @@ void SequenceV2::endNoteRecord(TouchPads::Touch* touch){
 
 
 void SequenceV2::updateNoteRecord(TouchPads::Touch* touch){
-
+    if(usePressureValues){
+        NoteV2* pending = pendingInputNotes[touch->touchPadId];
+        pending->recordPressure(roundedTime, touch->pressure);
+    }
 }
 
 
+///////////////////
+// LIVE 
+///////////////////
+
 void SequenceV2::startLiveOutput(TouchPads::Touch* touch){
-    liveOutputValue = 1.0;
+    liveOutputValue = 255;
     liveOutputNoteValue = getNoteValue(touch->touchPadId);
 }
 
 void SequenceV2::updateLiveOutput(TouchPads::Touch* touch){
-    //if(usePressureValues) liveOutputValue = touch.pressure;
+    if(usePressureValues) liveOutputValue = touch->pressure;
 }
 
 void SequenceV2::endLiveOutput(TouchPads::Touch* touch){
-    liveOutputValue = 0.0;
+    liveOutputValue = 0;
 }
 
+
+///////////////////
+// CONTROL
+///////////////////
 
 void SequenceV2::restart(){
     __debugPrint("reset");
@@ -152,7 +195,7 @@ bool SequenceV2::getEnabled(){
 
 void SequenceV2::clearAll(){
     currentNoteIndex = 0;
-    for(uint8_t i=0; i<MAX_NOTES; i++){
+    for(uint8_t i=0; i<numNotes; i++){
         NoteV2 *n = sequence[i];
         n->setDisabled(true);
     }
@@ -171,26 +214,25 @@ void SequenceV2::undo(){
 }
 
 
+///////////////////
+// NOTEVALUES
+///////////////////
+
 void SequenceV2::setNoteValueRef(NoteValues *nvalues){
     notevalues = nvalues;
     hasNoteValues = true;
 }
 
 
-int SequenceV2::getNoteValue(int padId){
+uint16_t SequenceV2::getNoteValue(uint8_t padId){
     if(hasNoteValues==false){
         return 65535; // return lowest value
     }
-
-    //Array<int, 12> nArray = notevalues->getNoteValues();
-    // Serial.print("New Note ID: ");
-    // Serial.println(padId);
-    //return nArray[padId];
     return notevalues->getNoteValues()[padId];
 }
 
 
-int SequenceV2::getActiveNoteValue(){
+uint16_t SequenceV2::getActiveNoteValue(){
     if(liveOutputValue>0){
         return liveOutputNoteValue;
     }else{
@@ -198,6 +240,10 @@ int SequenceV2::getActiveNoteValue(){
     }
 }
 
+
+///////////////////
+// DISPLAY
+///////////////////
 
 void SequenceV2::setupFrameDisplay(){
     frame = new int*[4];
@@ -216,9 +262,9 @@ int** SequenceV2::getFrameDisplay(){
 
     uint8_t x = 0;
     uint8_t y = 0;
-    for(uint8_t i=0; i<MAX_NOTES; i++){
+    for(uint8_t i=0; i<MAX_NOTES_DISPLAY; i++){
         NoteV2 *n = sequence[i];
-        if(i<MAX_NOTES){
+        if(i<numNotes){
             if(roundedTime>n->getStartTime() && roundedTime<n->getEndTime()){
                 frame[y][x] = 0;
             }else{

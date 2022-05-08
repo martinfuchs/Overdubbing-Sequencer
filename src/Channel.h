@@ -21,7 +21,7 @@ public:
     };
 
   Channel();
-  void setup(int type, uint8_t _numSequences=10);
+  void setup(int _type, uint8_t _numSequences, uint8_t _numNotesPerSequences, bool _usePressure, bool _debug);
   void update();
   void setNoteValueRef(NoteValues *notevalues);
   void updateFromTouchInput(Array<TouchPads::Touch*,NUM_TOUCHPADS> touches, bool record);
@@ -58,6 +58,12 @@ private:
 
     uint8_t numSequences;
     ustd::array<SequenceV2*> sequences;
+
+    uint8_t numNotesPerSequences = 20;
+
+    bool usePressure = false;
+    bool debug = false;
+
 
     // GATES
     uint8_t Gate1_Pin = 15;

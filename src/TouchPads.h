@@ -22,9 +22,9 @@ class TouchPads
         TouchPads();
 
         typedef struct Touch {
-            int touchPadId;
-            int eventType = TOUCH_NONE; // pending = 2, pressed = 1, released = -1, none = 0
-            int pressure = 0;
+            uint8_t touchPadId = 0;
+            uint8_t eventType = TOUCH_NONE; // pending = 2, pressed = 1, released = -1, none = 0
+            uint8_t pressure = 0;
         };
 
         void setup();
@@ -33,6 +33,8 @@ class TouchPads
         Array<TouchPads::Touch*,NUM_TOUCHPADS> getTouches();
     
     private:
+        uint8_t getPressureValue(uint8_t padId);
+
         // You can have up to 4 on one i2c bus but one is enough for testing!
         Adafruit_MPR121 cap = Adafruit_MPR121();
         // Keeps track of the last pins touched

@@ -5,19 +5,22 @@
 #include "TouchPads.h"
 #include "NoteValues.h"
 #include "NoteV2.h"
+#include <ustd_array.h>
+#include <ustd_map.h>
+#include "PressureNote.h"
 
-#define MAX_NOTES 20 //!>uint8_t
+
+#define MAX_NOTES_DISPLAY 20
 #define NUM_TOUCHPADS 12
-
 
 class SequenceV2
 {
   public:
     SequenceV2();
 
-    void setup(bool printDebug=false);
+    void setup(uint8_t numNotes, bool _usePressureValues, bool printDebug);
     void update();
-    int getOutputValue();
+    uint8_t getOutputValue(); // 0-255
 
     void setTouchInputs(Array<TouchPads::Touch*,NUM_TOUCHPADS> touches, bool record);
     void stopPendingInputs();
@@ -33,7 +36,7 @@ class SequenceV2
     void undo();
 
     void setNoteValueRef(NoteValues *notevalues);
-    int getActiveNoteValue(); // NOTE VALUE FOR DAC
+    uint16_t getActiveNoteValue(); // NOTE VALUE FOR DAC
 
     int** getFrameDisplay();
 
@@ -51,26 +54,29 @@ class SequenceV2
     void setupFrameDisplay();
     void setupSequenceNotes();
 
-    int getNoteValue(int padId);
+    uint16_t getNoteValue(uint8_t padId);
 
     void __debugPrint(String message);
 
-    Array<NoteV2*,MAX_NOTES> sequence;
+    bool printDebug = false;
+
+    // NOTES
+    uint8_t numNotes = 0;
+    ustd::array<NoteV2*> sequence;
+    //Array<NoteV2*,MAX_NOTES> sequence;
     Array<NoteV2*,NUM_TOUCHPADS> pendingInputNotes;
     int currentNoteIndex = 0;
 
+    // TIME
     unsigned long startTime = 0;
     int roundedTime = 0;
 
-    bool printDebug = false;
-
-    bool enabled = false;
-
     // OUTPUT
-    //uint8_t outputPin = -1;
-    //bool usePressureValues = false;
-    int liveOutputValue = 0.0;
-    int sequenceOutputValue = 0.0;
+    bool enabled = false;
+    bool usePressureValues = false;
+    uint8_t liveOutputValue = 0;
+    uint8_t sequenceOutputValue = 0;
+    float interpolatedOutputValue = 0;
 
     // DISPLAY
     int** frame;
@@ -78,13 +84,16 @@ class SequenceV2
     //NOTEVALUES
     NoteValues *notevalues;
     bool hasNoteValues = false;
-    int liveOutputNoteValue = -1;
-    int sequenceOutputNoteValue = -1;
+    uint16_t liveOutputNoteValue = 0;
+    uint16_t sequenceOutputNoteValue = 0;
 
     // PLAYBACK
     boolean playing = false;
     boolean recording = false;
     boolean handsOn = false;
+
+    // PRESSURE
+    ustd::map<uint8_t, PressureNote*> pressureNotes;
 
 };
 #endif

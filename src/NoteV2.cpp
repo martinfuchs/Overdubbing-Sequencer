@@ -52,17 +52,44 @@ uint8_t NoteV2::getPadId(){
 }
 
 
+void NoteV2::setPressureNote(PressureNote * _pNote){
+    // could not include array into this class because of memory limit 
+    // -> todo: find way to add longer pressure recordings
+    pNote = _pNote;
+    usePressure = true;
+}
 
-void NoteV2::update(int time){
+
+void NoteV2::recordPressure(uint32_t roundedTime, uint8_t pressure){
+    if (roundedTime != lastPressureUpdateTime && pNote->recordPosition<=pNote->maxLength-1){
+        pNote->pressure[pNote->recordPosition] = pressure;
+        pNote->recordPosition += 1;
+        lastPressureUpdateTime = roundedTime;
+    }
+}
+
+void NoteV2::playPressure(uint32_t roundedTime){
+    if (roundedTime != lastPressureUpdateTime && pNote->playbackPosition<=pNote->maxLength-1){
+        output = pNote->pressure[pNote->playbackPosition];
+        pNote->playbackPosition += 1;
+        lastPressureUpdateTime = roundedTime;
+    }
+}
+
+
+void NoteV2::update(uint32_t roundedTime){
     if (disabled == false){
-        // direct time comparing only with rounded time 
+        // direct time comparing only with rounded time (millis*0.1)
         // uncomment to verify multiple triggers with same time value
         // if(time == startTime) __debugPrint(time, true);
-        if(time == startTime && pendingPlay == false){ 
+        if(roundedTime == startTime && pendingPlay == false){ 
             startPlay();
         }
-        if(time == endTime && pendingPlay == true){
+        if(roundedTime == endTime && pendingPlay == true){
             endPlay();
+        }
+        if(pendingPlay && usePressure){
+            playPressure(roundedTime);
         }
     }
 }
@@ -73,31 +100,36 @@ uint8_t NoteV2::getOutput(){
 }
 
 
-void NoteV2::startRecord(uint8_t time, uint8_t _index, uint8_t _padId){
+void NoteV2::startRecord(uint32_t roundedTime, uint8_t _index, uint8_t _padId){
     index = _index;
     padId = _padId;
+    if(usePressure) pNote->recordPosition = 0;
 
     pendingRecord = true;
-    startTime = time;
+    startTime = roundedTime;
     startPlay();
 }
 
 
-void NoteV2::endRecord(int time){
+void NoteV2::endRecord(uint32_t roundedTime){
     if(pendingRecord==false) return;
 
     pendingRecord = false;
-    endTime = time;
+    endTime = roundedTime;
     duration = endTime - startTime; //duration is negative if end gets interrupted from clock reset
-    // ---> todo add duration in update and check on endTime if duration is true
+    // ---> todo: add duration in update and check on endTime if duration is true
     setDisabled(false);
     endPlay();
+
+    //
+    lastPressureUpdateTime = roundedTime;
 }
 
 
 void NoteV2::startPlay(){
     pendingPlay = true;
-    output = 1;
+    if(usePressure==false) output = 255;
+    if(usePressure) pNote->playbackPosition = 0;
 }
 
 

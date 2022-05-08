@@ -25,34 +25,34 @@ void TouchPads::setup(){
   }
 }
 
+
 int count = 0;
 void TouchPads::update(){
 
     // Get the currently touched pads
     currtouched = cap.touched();
     hasTouch = false;
+    //Serial.println(getPressureValue(0));
     for (uint8_t i=0; i<NUM_TOUCHPADS; i++) {
 
         activeTouches[i]->touchPadId = i;
         //activeTouches[i].eventType = 0;
         // it if *is* touched and *wasnt* touched before, alert!
-        if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)) ) {
+        if ((currtouched & _BV(i)) && !(lasttouched & _BV(i)) ) { // -->> todo: fix: sometimes not trigger
             activeTouches[i]->eventType = TOUCH_PRESSED;
-            //activeTouches[i].pressure = 125;
-            //int pressureValue = cap.filteredData(i);
-            //activeTouches[i].pressure.add(pressureValue);
+            activeTouches[i]->pressure = 0; //reset
             hasTouch = true;
             count = 0;
         }
         // if it *was* touched and now *isnt*, alert!
         if (!(currtouched & _BV(i)) && (lasttouched & _BV(i)) ) {
             activeTouches[i]->eventType = TOUCH_RELEASED;
+            activeTouches[i]->pressure = 0; //reset
             hasTouch = true;
         }
 
         if(activeTouches[i]->eventType == TOUCH_PENDING){
-            int pressureValue = cap.filteredData(i); // 125 no input -> 0 input (minimum ca. 50)
-            activeTouches[i]->pressure = pressureValue;
+            activeTouches[i]->pressure = getPressureValue(i);
             hasTouch = true;
             count ++;
         }
@@ -78,13 +78,17 @@ void TouchPads::update(){
 
 }
 
+uint8_t TouchPads::getPressureValue(uint8_t padId){
+    uint8_t pressureValue = cap.filteredData(padId); // 125 no input -> 0 input (minimum ca. 50)
+    return map(pressureValue,125,50,0,255);
+}
+
 
 boolean TouchPads::hasNewInput(){
   return hasTouch;
 }
 
 Array<TouchPads::Touch*,NUM_TOUCHPADS> TouchPads::getTouches(){
-
   for (uint8_t i=0; i<NUM_TOUCHPADS; i++) {
 
     // copy to prev
@@ -97,7 +101,6 @@ Array<TouchPads::Touch*,NUM_TOUCHPADS> TouchPads::getTouches(){
     }
     if(activeTouches[i]->eventType == TOUCH_RELEASED){
       activeTouches[i]->eventType = TOUCH_NONE;
-      //activeTouches[i].pressure.erase();
     }
   }
   return prevTouches;
