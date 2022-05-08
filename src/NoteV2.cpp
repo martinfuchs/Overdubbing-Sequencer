@@ -20,6 +20,7 @@ void NoteV2::reset() {
     pendingPlay = false;
     disabled = true;
     output = 0;
+    lastPressureUpdateTime = 0;
 }
 
 
@@ -61,6 +62,8 @@ void NoteV2::setPressureNote(PressureNote * _pNote){
 
 
 void NoteV2::recordPressure(uint32_t roundedTime, uint8_t pressure){
+    if(usePressure == false) return;
+
     if (roundedTime != lastPressureUpdateTime && pNote->recordPosition<=pNote->maxLength-1){
         pNote->pressure[pNote->recordPosition] = pressure;
         pNote->recordPosition += 1;
@@ -68,7 +71,7 @@ void NoteV2::recordPressure(uint32_t roundedTime, uint8_t pressure){
     }
 }
 
-void NoteV2::playPressure(uint32_t roundedTime){
+void NoteV2::playPressure(uint32_t roundedTime){    
     if (roundedTime != lastPressureUpdateTime && pNote->playbackPosition<=pNote->maxLength-1){
         output = pNote->pressure[pNote->playbackPosition];
         pNote->playbackPosition += 1;
