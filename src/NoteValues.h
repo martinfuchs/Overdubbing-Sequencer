@@ -25,6 +25,7 @@ class NoteValues
         int** getNoteDisplay();
         Array<int, 12> getNoteValues();
         void applyNotes(Array<int, 12> notes);
+        uint8_t getLowest();
 
 
     private:

@@ -77,6 +77,10 @@ int NoteValues::getPreviewNote(){
     return rotaryNoteValue;
 }
 
+uint8_t NoteValues::getLowest(){
+    return MAX_NOTE_VAL;
+}
+
 
 // DISPLAY
 void NoteValues::setupNoteDisplay(){

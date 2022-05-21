@@ -28,7 +28,7 @@ Channel channel3;
 const long eventTime_updateSequencer = 2; //in ms
 unsigned long previousTime_updateSequencer  = 0;
 
-const long eventTime_updateDAC = 1; //in ms
+const long eventTime_updateDAC = 4; //in ms
 unsigned long previousTime_updateDAC  = 0;
 
 int** sequencerFrame;
@@ -296,7 +296,7 @@ void updateSequencer(){
       channel3.update();
 
       int newNoteValue = getSelectedVoutChannel()->getActiveNoteValue();
-      if(newNoteValue != -1){
+      if(newNoteValue != 0){
         activeNoteValue = newNoteValue;
       }
   }

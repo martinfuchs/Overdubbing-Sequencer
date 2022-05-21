@@ -28,6 +28,8 @@ class NoteV2
     uint8_t getEndTime();
     uint8_t getPadId();
 
+    bool isPlaying();
+
   private:
     void setup();
     void startPlay();

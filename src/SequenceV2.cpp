@@ -111,7 +111,8 @@ void SequenceV2::update(){
     sequenceOutputValue = 0;
     for(uint8_t i=0; i<numNotes; i++){
         sequence[i]->update(roundedTime);
-        if (sequence[i]->getDisabled() == false && sequence[i]->getOutput()>=sequenceOutputValue){
+        
+        if (sequence[i]->isPlaying() && sequence[i]->getOutput()>=sequenceOutputValue){
             sequenceOutputValue = sequence[i]->getOutput();
             sequenceOutputNoteValue = getNoteValue(sequence[i]->getPadId());
         }
