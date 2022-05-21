@@ -27,7 +27,7 @@ Long press clickencoder to change active mode (PLAY/RECORD, NOTEEDIT, SAVE)
 
 #### PLAY/RECORD
 
-![led-matrix-sections](doku/ledMatrixSections.png "led matrix sections")
+![led-matrix-sections](doku/ledMatrixSections-resized.png "led matrix sections")
 
 ```
 1: Play/Record
@@ -64,7 +64,7 @@ Long press right button to delete sequence.
 
 #### NOTEEDIT
 
-![led-matrix-notes](doku/ledMatrixPadEdit.png "led matrix note edit")
+![led-matrix-notes](doku/ledMatrixPadEdit-resized.png "led matrix note edit")
 
 Touch notepad and rotate clickencoder to change note value. 
 
@@ -74,7 +74,7 @@ Press right button to toggle clickencoder rotation speed.
 
 #### SAVE
 
-![led-matrix-save](doku/ledMatrixSaveLoad.png "led matrix save/load")
+![led-matrix-save](doku/ledMatrixSaveLoad-resized.png "led matrix save/load")
 
 Press right button to save active note values.
 
