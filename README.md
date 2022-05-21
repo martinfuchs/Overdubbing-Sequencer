@@ -1,5 +1,7 @@
 # Alternative Firmware for TSNM MKII (doboz.audio)
 
+[Work in progress]
+
 Minimal eurorack overdubbing sequencer with 3 independent channels. 
 Two channels for gates and one channel for envelope from pad pressure value (12 bit). 
 
@@ -10,8 +12,6 @@ Channel One (Gate) -> Max 10 Sequences à 20 Notes
 Channel Two (Gate) -> Max 10 Sequences à 20 Notes
 
 Channel Three (Envelope) -> Max 5 Sequences à 5 Notes
-
-[Work in progress]
 
 ## Usage
 
