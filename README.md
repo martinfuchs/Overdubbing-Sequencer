@@ -14,7 +14,6 @@ Channel Three (Envelope) -> Max 5 Sequences à 5 Notes
 [Work in progress]
 
 ## Usage
-======
 
 Feed clock input to play/record sequences.
 
@@ -28,14 +27,14 @@ Long press clickencoder to change active mode (PLAY/RECORD, NOTEEDIT, SAVE)
 
 #### PLAY/RECORD
 
-![led-matrix-sections](doku/ledMatrixSections.png =250x "led matrix sections")
+![led-matrix-sections](doku/ledMatrixSections.png "led matrix sections")
 
-'''
+```
 1: Play/Record
 2: Active DAC output channel
 3: Selected channel
 4/5: Sequences/Notes
-'''
+```
 
 While in record mode: Place notes by touching the notepad. Press right button to delete last note.
 
@@ -65,7 +64,7 @@ Long press right button to delete sequence.
 
 #### NOTEEDIT
 
-![led-matrix-notes](doku/ledMatrixPadEdit.png =250x "led matrix note edit")
+![led-matrix-notes](doku/ledMatrixPadEdit.png "led matrix note edit")
 
 Touch notepad and rotate clickencoder to change note value. 
 
@@ -75,7 +74,7 @@ Press right button to toggle clickencoder rotation speed.
 
 #### SAVE
 
-![led-matrix-save](doku/ledMatrixSaveLoad.png =250x "led matrix save/load")
+![led-matrix-save](doku/ledMatrixSaveLoad.png "led matrix save/load")
 
 Press right button to save active note values.
 
