@@ -4,6 +4,9 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <Array.h>
+#include "SequenceV2.h"
+#include <ustd_array.h>
+#include "NoteV2.h"
 
 
 class SaveHandler
@@ -11,14 +14,16 @@ class SaveHandler
     public:
         SaveHandler();
         void update();
-        //void saveSequenceMaps()
-        void saveNotes(Array<int, 12> notes);
-        Array<int, 12> loadNotes();
+        int saveSequences(int addressIndex, ustd::array<SequenceV2*> sequences, uint8_t numSequences, uint8_t numNotes);
+        int loadSequences(int addressIndex, ustd::array<SequenceV2*> sequences, uint8_t numSequences, uint8_t numNotes);
+
+        int saveNotes(int address, Array<int, 12>  notes);
+        Array<int, 12> loadNotes(int address);
 
     private:
         void setup();
-        void writeIntArrayIntoEEPROM(int address, Array<int, 12> data, int arraySize);
-        Array<int, 12> readIntArrayFromEEPROM(int address, int arraySize);
+        // int writeIntArrayIntoEEPROM(int address, Array<int, 12> data, int arraySize);
+        // Array<int, 12> readIntArrayFromEEPROM(int address, int arraySize);
 };
 
 #endif

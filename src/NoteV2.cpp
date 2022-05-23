@@ -21,20 +21,16 @@ void NoteV2::reset() {
     disabled = true;
     output = 0;
     lastPressureUpdateTime = 0;
-}
-
-
-void NoteV2::setDisabled(bool value){
-    disabled = value;
-}
-
-
-bool NoteV2::getDisabled(){
-    return disabled;
+    usePressure = false;
 }
 
 uint8_t NoteV2::getIndex(){
     return index;
+}
+
+
+uint8_t NoteV2::getPadId(){
+    return padId;
 }
 
 
@@ -48,9 +44,15 @@ uint8_t NoteV2::getEndTime(){
 }
 
 
-uint8_t NoteV2::getPadId(){
-    return padId;
+void NoteV2::setDisabled(bool value){
+    disabled = value;
 }
+
+
+bool NoteV2::getDisabled(){
+    return disabled;
+}
+
 
 bool NoteV2::isPlaying(){
     return pendingPlay;
@@ -99,6 +101,16 @@ void NoteV2::update(uint32_t roundedTime){
             playPressure(roundedTime);
         }
     }
+}
+
+
+void NoteV2::createFromValues(uint8_t _index, uint8_t _padId, uint32_t _startTime, uint32_t _endTime){
+    reset();
+    setDisabled(false);
+    index = _index;
+    padId = _padId;
+    startTime = _startTime;
+    endTime = _endTime;
 }
 
 

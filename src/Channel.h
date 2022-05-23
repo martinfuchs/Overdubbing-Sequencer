@@ -31,7 +31,6 @@ public:
   void resetClock();
   int** getFrameDisplay();
   int getActiveNoteValue(); // NOTE VALUE FOR DAC
-  uint8_t getNumSequences();
   void triggerSequence(int sequenceIndex);
 
   //
@@ -40,6 +39,11 @@ public:
   bool isSequenceEnabled(int index);
 
   int** getSequencesDisplay();
+
+  //
+  ustd::array<SequenceV2*> getSequences();
+  uint8_t getNumSequences();
+  uint8_t getNumNotesPerSequence();
 
   
 private:

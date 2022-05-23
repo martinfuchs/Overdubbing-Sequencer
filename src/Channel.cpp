@@ -169,6 +169,14 @@ uint8_t Channel::getNumSequences(){
     return numSequences;
 }
 
+uint8_t Channel::getNumNotesPerSequence(){
+    return numNotesPerSequences;
+}
+
+ustd::array<SequenceV2*> Channel::getSequences(){
+    return sequences;
+}
+
 
 //////////////////////////////////////////////////////////////////
 // DISPLAY

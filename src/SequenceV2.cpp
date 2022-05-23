@@ -147,6 +147,14 @@ void SequenceV2::updateNoteRecord(TouchPads::Touch* touch){
     }
 }
 
+ustd::array<NoteV2*> SequenceV2::getNoteArray(){
+    return sequence;
+}
+
+uint8_t SequenceV2::getNumNotes(){
+    return numNotes;
+}
+
 
 ///////////////////
 // LIVE 

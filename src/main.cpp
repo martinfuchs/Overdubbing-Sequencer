@@ -83,6 +83,34 @@ NoteValues noteValues;
 SaveHandler saveHandler;
 
 
+
+///////////////////////////////////
+//  SAVE HANDLER
+///////////////////////////////////
+
+void saveAll(){
+  int addressIndex = 0;
+  addressIndex = saveHandler.saveSequences(addressIndex, channel1.getSequences(), channel1.getNumSequences(), channel1.getNumNotesPerSequence());
+  addressIndex = saveHandler.saveSequences(addressIndex, channel2.getSequences(), channel2.getNumSequences(), channel2.getNumNotesPerSequence());
+  //addressIndex = saveHandler.saveSequences(addressIndex, channel3.getSequences(), channel3.getNumSequences(), channel3.getNumNotesPerSequence());
+  addressIndex = saveHandler.saveNotes(addressIndex, noteValues.getNoteValues());
+  Serial.print("Saved bytes: ");
+  Serial.print(addressIndex);
+  Serial.print("/");
+  Serial.println(2048); //Teensy 3.1	2048 bytes EEPROM
+  Serial.print("Bytes remaining: ");
+  Serial.println(2048-addressIndex);
+}
+
+void loadAll(){
+  int addressIndex = 0;
+  addressIndex = saveHandler.loadSequences(addressIndex, channel1.getSequences(), channel1.getNumSequences(), channel1.getNumNotesPerSequence());
+  addressIndex = saveHandler.loadSequences(addressIndex, channel2.getSequences(), channel2.getNumSequences(), channel2.getNumNotesPerSequence());
+  //addressIndex = saveHandler.loadSequences(addressIndex, channel3.getSequences(), channel3.getNumSequences(), channel3.getNumNotesPerSequence());
+  noteValues.applyNotes(saveHandler.loadNotes(addressIndex));
+}
+
+
 ///////////////////////////////////
 // MAIN SETUP
 ///////////////////////////////////
@@ -127,9 +155,6 @@ void setup(){
   clickEncoder.setDoubleClickEnabled(true);
   clickEncoder.setLongPressRepeatEnabled(true);
 
-  // LOAD DEFAULT
-  noteValues.applyNotes(saveHandler.loadNotes());
-
   // APPLY DEFAULT NOTEVALUES
   channel1.setNoteValueRef(&noteValues);
   channel2.setNoteValueRef(&noteValues);
@@ -139,6 +164,9 @@ void setup(){
   channel1.enableSequence(0);
   channel2.enableSequence(0);
   channel3.enableSequence(0);
+
+  // LOAD DEFAULT
+  loadAll();
 }
 
 ///////////////////////////////////
@@ -342,7 +370,8 @@ void button1Released(){
   }else if(states.getMainState()==States::MAIN_NOTEEDIT){ //-------------------------> MAIN_NOTEEDIT
     noteValues.toggleAddStep();
   }else if(states.getMainState()==States::MAIN_SAVE){ //-------------------------> MAIN_SAVE
-    noteValues.applyNotes(saveHandler.loadNotes());
+    loadAll();
+    //noteValues.applyNotes(saveHandler.loadNotes());
   }
 }
 
@@ -366,7 +395,8 @@ void button2Released(){
     }else if(states.getMainState()==States::MAIN_NOTEEDIT){ //-------------------------> MAIN_NOTEEDIT
       noteValues.saveSelectedNote();
     }else if(states.getMainState()==States::MAIN_SAVE){ //-------------------------> MAIN_SAVE
-      saveHandler.saveNotes(noteValues.getNoteValues());
+      saveAll();
+      //saveHandler.saveNotes(noteValues.getNoteValues());
     }
   }
 }

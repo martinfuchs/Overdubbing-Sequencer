@@ -40,6 +40,8 @@ class SequenceV2
 
     int** getFrameDisplay();
 
+    ustd::array<NoteV2*> getNoteArray();
+    uint8_t getNumNotes();
 
   private:
     void setup();

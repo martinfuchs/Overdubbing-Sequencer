@@ -4,6 +4,8 @@
 #include <Arduino.h>
 #include <Array.h>
 #include "TouchPads.h"
+#include <ustd_array.h>
+
 
 #define MAX_NOTE_VAL 65535
 
