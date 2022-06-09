@@ -89,25 +89,22 @@ SaveHandler saveHandler;
 ///////////////////////////////////
 
 void saveAll(){
-  int addressIndex = 0;
-  addressIndex = saveHandler.saveSequences(addressIndex, channel1.getSequences(), channel1.getNumSequences(), channel1.getNumNotesPerSequence());
-  addressIndex = saveHandler.saveSequences(addressIndex, channel2.getSequences(), channel2.getNumSequences(), channel2.getNumNotesPerSequence());
-  //addressIndex = saveHandler.saveSequences(addressIndex, channel3.getSequences(), channel3.getNumSequences(), channel3.getNumNotesPerSequence());
-  addressIndex = saveHandler.saveNotes(addressIndex, noteValues.getNoteValues());
-  Serial.print("Saved bytes: ");
-  Serial.print(addressIndex);
-  Serial.print("/");
-  Serial.println(2048); //Teensy 3.1	2048 bytes EEPROM
-  Serial.print("Bytes remaining: ");
-  Serial.println(2048-addressIndex);
+  saveHandler.saveSequences("channel1.csv", channel1.getSequences(), channel1.getNumSequences(), channel1.getNumNotesPerSequence());
+  saveHandler.saveSequences("channel2.csv", channel2.getSequences(), channel2.getNumSequences(), channel2.getNumNotesPerSequence());
+  saveHandler.saveSequences("channel3.csv", channel3.getSequences(), channel3.getNumSequences(), channel3.getNumNotesPerSequence());
+
+  saveHandler.saveNotes(0, noteValues.getNoteValues());
 }
 
 void loadAll(){
-  int addressIndex = 0;
-  addressIndex = saveHandler.loadSequences(addressIndex, channel1.getSequences(), channel1.getNumSequences(), channel1.getNumNotesPerSequence());
-  addressIndex = saveHandler.loadSequences(addressIndex, channel2.getSequences(), channel2.getNumSequences(), channel2.getNumNotesPerSequence());
-  //addressIndex = saveHandler.loadSequences(addressIndex, channel3.getSequences(), channel3.getNumSequences(), channel3.getNumNotesPerSequence());
-  noteValues.applyNotes(saveHandler.loadNotes(addressIndex));
+  channel1.clearAll();
+  channel2.clearAll();
+  channel3.clearAll();
+  saveHandler.loadSequences("channel1.csv", channel1.getSequences(), channel1.getNumSequences(), channel1.getNumNotesPerSequence());
+  saveHandler.loadSequences("channel2.csv", channel2.getSequences(), channel2.getNumSequences(), channel2.getNumNotesPerSequence());
+  saveHandler.loadSequences("channel3.csv", channel3.getSequences(), channel3.getNumSequences(), channel3.getNumNotesPerSequence());
+
+  noteValues.applyNotes(saveHandler.loadNotes(0));
 }
 
 
@@ -147,7 +144,7 @@ void setup(){
   // SEQUENCER
   //int _type, uint8_t _numSequences, uint8_t _numNotesPerSequences, bool _usePressure, bool _debug
   channel1.setup(0, 10, 20, false, false);
-  channel2.setup(1, 10, 20, false, false);
+  channel2.setup(1, 5, 20, false, false);
   channel3.setup(2, 5, 5, true, false);
 
   //ROTARY ENCODER
@@ -166,7 +163,7 @@ void setup(){
   channel3.enableSequence(0);
 
   // LOAD DEFAULT
-  loadAll();
+  //loadAll();
 }
 
 ///////////////////////////////////

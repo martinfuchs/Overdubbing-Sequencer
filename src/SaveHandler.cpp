@@ -14,51 +14,171 @@ void SaveHandler::update(){
 }
 
 
-int SaveHandler::saveSequences(int addressIndex, ustd::array<SequenceV2*> sequences, uint8_t numSequences, uint8_t numNotes){
+void SaveHandler::saveSequences(char* fileName, ustd::array<SequenceV2*> sequences, uint8_t numSequences, uint8_t numNotes){
+
+    // Initialize the SD.
+    if (!sd.begin(SD_CONFIG)) {
+      sd.initErrorHalt(&Serial);
+      return;
+    }
+
+    // Remove any existing file.
+    if (sd.exists(fileName)) {
+      sd.remove(fileName);
+    }
+    // Create the file.
+    if (!file.open(fileName, FILE_WRITE)) {
+      Serial.println("open failed");
+    }
+
+    // Write data
+    file.print("+CHANNEL:"+String(fileName)+",0,0,0\r\n");
     for(uint8_t i=0; i<numSequences; i++){
       SequenceV2* sequence = sequences[i];
+      file.print("#SEQ:"+String(i)+",0,0,0\r\n");
       ustd::array<NoteV2*> noteArray = sequence->getNoteArray();
       for(uint8_t i=0; i<numNotes; i++){
         NoteV2 *n = noteArray[i];
-        if(n->getDisabled()){
-          EEPROM.write(addressIndex, uint8_t(0));
-        }else{
-          EEPROM.write(addressIndex, uint8_t(1));
+        String saveString = "-1,0,0,0";
+        if(n->getDisabled()==false){
+          // uint8_t, uint8_t, uint32_t, uint32_t
+          saveString = String(n->getIndex())+","+String(n->getPadId())+","+String(n->getStartTime())+","+String(n->getEndTime());
         }
-        addressIndex++;
-        EEPROM.write(addressIndex, n->getIndex());
-        addressIndex++;
-        EEPROM.write(addressIndex, n->getPadId());
-        addressIndex++;
-        EEPROM.write(addressIndex, n->getStartTime());
-        addressIndex++;
-        EEPROM.write(addressIndex, n->getEndTime());
-        addressIndex++;
+        file.print(saveString+"\r\n");
       }
     }
-    return addressIndex;
+    file.close();
+    Serial.println("Done");
+}
+
+bool equalString(String a, String b){
+  if(a == b){
+    return true;
+  }
+  return false;
+}
+
+bool firstChar(String line, String first){
+  return equalString(line.charAt(0),first);
 }
 
 
-int SaveHandler::loadSequences(int addressIndex, ustd::array<SequenceV2*> sequences, uint8_t numSequences, uint8_t numNotes){
-    for(uint8_t i=0; i<numSequences; i++){
-      SequenceV2* sequence = sequences[i];
-      ustd::array<NoteV2*> noteArray = sequence->getNoteArray();
-      bool hasSavedData = false;
-      for(uint8_t i=0; i<numNotes; i++){
-        if(EEPROM.read(addressIndex)==1){
-          NoteV2 *n = noteArray[i];
-          n->createFromValues(EEPROM.read(addressIndex+1),EEPROM.read(addressIndex+2),EEPROM.read(addressIndex+3),EEPROM.read(addressIndex+4));
-          hasSavedData = true;
-        }
-        addressIndex+=5;
-      }
-      if(hasSavedData){
-        sequence->setEnabled(true);
-      }
+void SaveHandler::loadSequences(char* fileName, ustd::array<SequenceV2*> sequences, uint8_t numSequences, uint8_t numNotes){
+    Serial.print("Load File:");
+    Serial.println(fileName);
+
+    // Initialize the SD.
+    if (!sd.begin(SD_CONFIG)) {
+      sd.initErrorHalt(&Serial);
+      return;
     }
-    return addressIndex;
+
+    // Create the file.
+    if (!file.open(fileName, FILE_WRITE)) {
+      Serial.println("open failed");
+    }
+
+    // Rewind file for read.
+    file.rewind();
+
+    int sequenceCount = 0;
+    int noteCount = 0;
+    bool sequenceEmpty = true;
+
+    while (file.available()) {
+      int n = file.fgets(line, sizeof(line));
+      if (n <= 0) {
+        Serial.println("fgets failed");
+      }
+      if (line[n-1] != '\n' && n == (sizeof(line) - 1)) {
+        Serial.println("line too long");
+      }
+
+      
+      // Parse line
+      int nIndex = -1;
+      uint8_t nPadId = 0;
+      uint32_t nStartTime = 0;
+      uint32_t nEndTime = 0;
+      //
+      char *p = line;
+      char *str;
+      int charIndex = 0;
+      while ((str = strtok_r(p, ",", &p)) != NULL){
+        //Serial.print(charIndex);
+        //Serial.print(": ");
+        //Serial.println(str);
+        //
+        if(charIndex==0){
+          if(firstChar(str,"-")){
+            //Serial.print("-- EMPTY NOTE:");
+            //Serial.println(noteCount);
+            nIndex = -1;
+            noteCount++;
+          }else if(firstChar(str,"#")){
+            //Serial.print("------------- SEQUENCE:");
+            //Serial.println(sequenceCount);
+            sequenceCount+=1;
+            noteCount = 0;
+            nIndex = -1;
+          }else if(firstChar(str,"+")){
+            //Serial.println("------------- HEADER");
+            nIndex = -1;
+          }else{
+            // Serial.print("-- NOTE:");
+            // Serial.println(noteCount);
+            nIndex = String(str).toInt();
+            noteCount++;
+            sequenceEmpty = false;
+          }
+        }
+        if(nIndex!=-1){
+          if(charIndex==1){
+            nPadId = String(str).toInt();
+          }else if(charIndex==2){
+            nStartTime = String(str).toInt();
+          }else if(charIndex==3){
+            nEndTime = String(str).toInt();
+          }
+        }
+        charIndex+=1;
+      }
+
+      // Apply data
+      if(nIndex!=-1){
+        int seqCount = sequenceCount-1;
+        int nCount = noteCount-1;
+        if(seqCount<numSequences){
+          // Serial.println("+++++++++++++++++++");
+          // Serial.print("SEQ:");
+          // Serial.println(seqCount);
+
+          // Serial.print("NOTE:");
+          // Serial.println(nCount);
+          // Serial.println(nIndex);
+          // Serial.println(nPadId);
+          // Serial.println(nStartTime);
+          // Serial.println(nEndTime);
+          // Serial.println("+++++++++++++++++++");
+          // Serial.println();
+
+          SequenceV2* sequence = sequences[seqCount];
+          ustd::array<NoteV2*> noteArray = sequence->getNoteArray();
+          NoteV2 *n = noteArray[nCount];
+          n->createFromValues(nIndex,nPadId,nStartTime,nEndTime);
+          sequence->increaseCurrentNoteIndex();
+
+          if(sequenceEmpty==false){
+            sequence->setEnabled(true);
+          }
+        }
+      }
+
+    }
+    file.close();
+    Serial.println(F("Done"));
 }
+
 
 
 Array<int, 12> SaveHandler::loadNotes(int addressIndex){
@@ -70,7 +190,7 @@ Array<int, 12> SaveHandler::loadNotes(int addressIndex){
   return notes;
 }
 
-
+//Teensy 3.1	2048 bytes EEPROM
 int SaveHandler::saveNotes(int addressIndex, Array<int, 12>  notes){
     for(uint8_t i=0; i<12; i++){
       EEPROM.write(addressIndex, notes[i] >> 8);
@@ -79,26 +199,3 @@ int SaveHandler::saveNotes(int addressIndex, Array<int, 12>  notes){
     }
     return addressIndex;
 }
-
-
-// int SaveHandler::writeIntArrayIntoEEPROM(int addressIndex, Array<int, 12> data, int arraySize)
-// {
-//   for (int i = 0; i < arraySize; i++) 
-//   {
-//     EEPROM.write(addressIndex, data[i] >> 8);
-//     EEPROM.write(addressIndex + 1, data[i] & 0xFF);
-//     addressIndex += 2;
-//   }
-//   return addressIndex;
-// }
-
-// Array<int, 12> SaveHandler::readIntArrayFromEEPROM(int addressIndex, int arraySize)
-// {
-//     Array<int, 12> notes;
-//     for (int i = 0; i < arraySize; i++)
-//     {
-//         notes[i] = (EEPROM.read(addressIndex) << 8) + EEPROM.read(addressIndex + 1);
-//         addressIndex += 2;
-//     }
-//     return notes;
-// }

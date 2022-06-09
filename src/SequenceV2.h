@@ -38,6 +38,8 @@ class SequenceV2
     void setNoteValueRef(NoteValues *notevalues);
     uint16_t getActiveNoteValue(); // NOTE VALUE FOR DAC
 
+    void increaseCurrentNoteIndex();
+
     int** getFrameDisplay();
 
     ustd::array<NoteV2*> getNoteArray();
@@ -65,7 +67,6 @@ class SequenceV2
     // NOTES
     uint8_t numNotes = 0;
     ustd::array<NoteV2*> sequence;
-    //Array<NoteV2*,MAX_NOTES> sequence;
     Array<NoteV2*,NUM_TOUCHPADS> pendingInputNotes;
     int currentNoteIndex = 0;
 

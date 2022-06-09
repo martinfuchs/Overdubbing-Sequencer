@@ -24,7 +24,6 @@ void SequenceV2::setupSequenceNotes(){
     for(uint8_t i=0; i<numNotes; i++){
         NoteV2* tmpNote = new NoteV2();
         tmpNote->setDisabled(true);
-        //sequence[i] = tmpNote;
         sequence.add(tmpNote);
     }
 
@@ -127,9 +126,7 @@ void SequenceV2::startNoteRecord(TouchPads::Touch* touch){
     newNote->startRecord(roundedTime, currentNoteIndex, touch->touchPadId);
     pendingInputNotes[touch->touchPadId] = newNote;
 
-    if(currentNoteIndex<=numNotes-2){
-        currentNoteIndex +=1;
-    }
+    increaseCurrentNoteIndex();
 }
 
 
@@ -216,10 +213,17 @@ void SequenceV2::undo(){
     if(currentNoteIndex<0){
         currentNoteIndex = 0;
     }
-    
+
     NoteV2* n = sequence[currentNoteIndex];
     n->setDisabled(true);
     __debugPrint("undo");
+}
+
+
+void SequenceV2::increaseCurrentNoteIndex(){
+    if(currentNoteIndex<=numNotes-2){
+        currentNoteIndex +=1;
+    }
 }
 
 
