@@ -25,3 +25,9 @@ void DAC16::write(unsigned value)
   digitalWrite(SYNCpin, HIGH);
   SPI.endTransaction();
 }
+
+
+void DAC16::hide(){
+  // maximum voltage -> lowest tone
+  write(65535);
+}

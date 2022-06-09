@@ -11,6 +11,7 @@ public:
   DAC16();
   void setup();
   void write(unsigned value);
+  void hide();
   
 private:
   const byte SYNCpin = 9;

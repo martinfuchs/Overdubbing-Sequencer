@@ -66,9 +66,9 @@ class SequenceV2
 
     // NOTES
     uint8_t numNotes = 0;
-    ustd::array<NoteV2*> sequence;
+    ustd::array<NoteV2*> noteArray;
     Array<NoteV2*,NUM_TOUCHPADS> pendingInputNotes;
-    int currentNoteIndex = 0;
+    int currentNoteIndex = -1;
 
     // TIME
     unsigned long startTime = 0;

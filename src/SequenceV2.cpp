@@ -24,7 +24,7 @@ void SequenceV2::setupSequenceNotes(){
     for(uint8_t i=0; i<numNotes; i++){
         NoteV2* tmpNote = new NoteV2();
         tmpNote->setDisabled(true);
-        sequence.add(tmpNote);
+        noteArray.add(tmpNote);
     }
 
     for(uint8_t i=0; i<NUM_TOUCHPADS; i++){
@@ -38,7 +38,7 @@ void SequenceV2::setupSequenceNotes(){
         for(uint8_t i=0; i<numNotes; i++){
             PressureNote* pNote = new PressureNote();
             pressureNotes[i] = pNote;
-            sequence[i]->setPressureNote(pNote);
+            noteArray[i]->setPressureNote(pNote);
         }
     }
 }
@@ -109,11 +109,11 @@ void SequenceV2::update(){
 
     sequenceOutputValue = 0;
     for(uint8_t i=0; i<numNotes; i++){
-        sequence[i]->update(roundedTime);
+        noteArray[i]->update(roundedTime);
         
-        if (sequence[i]->isPlaying() && sequence[i]->getOutput()>=sequenceOutputValue){
-            sequenceOutputValue = sequence[i]->getOutput();
-            sequenceOutputNoteValue = getNoteValue(sequence[i]->getPadId());
+        if (noteArray[i]->isPlaying() && noteArray[i]->getOutput()>=sequenceOutputValue){
+            sequenceOutputValue = noteArray[i]->getOutput();
+            sequenceOutputNoteValue = getNoteValue(noteArray[i]->getPadId());
         }
     }
 }
@@ -121,12 +121,11 @@ void SequenceV2::update(){
 
 void SequenceV2::startNoteRecord(TouchPads::Touch* touch){
     __debugPrint("Start note record");
-    NoteV2* newNote = sequence[currentNoteIndex];
+    increaseCurrentNoteIndex();
+    NoteV2* newNote = noteArray[currentNoteIndex];
     newNote->reset();
     newNote->startRecord(roundedTime, currentNoteIndex, touch->touchPadId);
     pendingInputNotes[touch->touchPadId] = newNote;
-
-    increaseCurrentNoteIndex();
 }
 
 
@@ -145,7 +144,7 @@ void SequenceV2::updateNoteRecord(TouchPads::Touch* touch){
 }
 
 ustd::array<NoteV2*> SequenceV2::getNoteArray(){
-    return sequence;
+    return noteArray;
 }
 
 uint8_t SequenceV2::getNumNotes(){
@@ -200,23 +199,26 @@ bool SequenceV2::getEnabled(){
 
 
 void SequenceV2::clearAll(){
-    currentNoteIndex = 0;
+    currentNoteIndex = -1;
     for(uint8_t i=0; i<numNotes; i++){
-        NoteV2 *n = sequence[i];
-        n->setDisabled(true);
+        NoteV2 *n = noteArray[i];
+        n->reset();
     }
 }
 
 
 void SequenceV2::undo(){
-    currentNoteIndex-=1;
-    if(currentNoteIndex<0){
-        currentNoteIndex = 0;
-    }
 
-    NoteV2* n = sequence[currentNoteIndex];
-    n->setDisabled(true);
+    if(currentNoteIndex>=0){
+        NoteV2* n = noteArray[currentNoteIndex];
+        n->reset();
+    }
     __debugPrint("undo");
+
+    currentNoteIndex-=1;
+    if(currentNoteIndex<-1){ 
+        currentNoteIndex = -1;
+    }
 }
 
 
@@ -276,7 +278,7 @@ int** SequenceV2::getFrameDisplay(){
     uint8_t x = 0;
     uint8_t y = 0;
     for(uint8_t i=0; i<MAX_NOTES_DISPLAY; i++){
-        NoteV2 *n = sequence[i];
+        NoteV2 *n = noteArray[i];
         if(i<numNotes){
             if(roundedTime>n->getStartTime() && roundedTime<n->getEndTime()){
                 frame[y][x] = 0;

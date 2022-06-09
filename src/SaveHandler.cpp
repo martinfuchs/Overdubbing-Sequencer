@@ -83,7 +83,6 @@ void SaveHandler::loadSequences(char* fileName, ustd::array<SequenceV2*> sequenc
 
     int sequenceCount = 0;
     int noteCount = 0;
-    bool sequenceEmpty = true;
 
     while (file.available()) {
       int n = file.fgets(line, sizeof(line));
@@ -129,7 +128,6 @@ void SaveHandler::loadSequences(char* fileName, ustd::array<SequenceV2*> sequenc
             // Serial.println(noteCount);
             nIndex = String(str).toInt();
             noteCount++;
-            sequenceEmpty = false;
           }
         }
         if(nIndex!=-1){
@@ -149,28 +147,26 @@ void SaveHandler::loadSequences(char* fileName, ustd::array<SequenceV2*> sequenc
         int seqCount = sequenceCount-1;
         int nCount = noteCount-1;
         if(seqCount<numSequences){
-          // Serial.println("+++++++++++++++++++");
-          // Serial.print("SEQ:");
-          // Serial.println(seqCount);
+          Serial.println("+++++++++++++++++++");
+          Serial.print("SEQ:");
+          Serial.println(seqCount);
 
-          // Serial.print("NOTE:");
-          // Serial.println(nCount);
-          // Serial.println(nIndex);
-          // Serial.println(nPadId);
-          // Serial.println(nStartTime);
-          // Serial.println(nEndTime);
-          // Serial.println("+++++++++++++++++++");
-          // Serial.println();
+          Serial.print("NOTE:");
+          Serial.println(nCount);
+          Serial.println(nIndex);
+          Serial.println(nPadId);
+          Serial.println(nStartTime);
+          Serial.println(nEndTime);
+          Serial.println("+++++++++++++++++++");
+          Serial.println();
 
           SequenceV2* sequence = sequences[seqCount];
           ustd::array<NoteV2*> noteArray = sequence->getNoteArray();
           NoteV2 *n = noteArray[nCount];
           n->createFromValues(nIndex,nPadId,nStartTime,nEndTime);
           sequence->increaseCurrentNoteIndex();
-
-          if(sequenceEmpty==false){
-            sequence->setEnabled(true);
-          }
+          sequence->setEnabled(true);
+          sequence->play();
         }
       }
 

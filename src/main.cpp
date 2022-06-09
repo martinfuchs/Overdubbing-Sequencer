@@ -120,11 +120,8 @@ void setup(){
   SPI.begin();
 
   // DAC
-  // init with maximum voltage -> lowest tone
   activeNoteValue = 0;
-  dac16.write(0);
-  delay(100);
-  dac16.write(65535);
+  dac16.hide();
 
   // TOUCHPADS
   touchPads.setup();
@@ -203,6 +200,9 @@ void updateClickEncoderButtonState()
     {
     case Button::Clicked:
         selectMainState = false;
+        if(states.getMainState()==States::MAIN_PLAY){
+          states.setRecording(!states.getRecording());
+        }
         Serial.println("Button clicked");
         break;
     case Button::DoubleClicked:
@@ -337,9 +337,10 @@ void updateDAC(){
     if(activeNoteValue > 0){
       dac16.write(activeNoteValue);
     }
-  }
-  if(states.getMainState()==States::MAIN_NOTEEDIT){ //-------------------------> MAIN_NOTEEDIT
+  }else if(states.getMainState()==States::MAIN_NOTEEDIT){ //-------------------------> MAIN_NOTEEDIT
       dac16.write(noteValues.getPreviewNote());
+  }else{
+      dac16.hide();
   }
 }
 
@@ -368,7 +369,6 @@ void button1Released(){
     noteValues.toggleAddStep();
   }else if(states.getMainState()==States::MAIN_SAVE){ //-------------------------> MAIN_SAVE
     loadAll();
-    //noteValues.applyNotes(saveHandler.loadNotes());
   }
 }
 
@@ -393,11 +393,9 @@ void button2Released(){
       noteValues.saveSelectedNote();
     }else if(states.getMainState()==States::MAIN_SAVE){ //-------------------------> MAIN_SAVE
       saveAll();
-      //saveHandler.saveNotes(noteValues.getNoteValues());
     }
   }
 }
-
 
 
 ///////////////////////////////////
@@ -516,6 +514,5 @@ void loop(){
       digitalWrite(Led2_Pin, HIGH);
       digitalWrite(Led1_Pin, LOW);
   }
-
 
 }
