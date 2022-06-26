@@ -43,11 +43,16 @@ public:
   bool isSequenceEnabled(int index);
 
   int** getSequencesDisplay();
+  int** getRandomDisplay();
 
   //
   ustd::array<SequenceV2*> getSequences();
   uint8_t getNumSequences();
   uint8_t getNumNotesPerSequence();
+
+  //
+  bool getRandomMode();
+  void setRandomMode(bool value);
 
   
 private:
@@ -90,6 +95,9 @@ private:
     //
     uint8_t blinkCounter = 0;
     uint8_t blinkSpeed = 1;
+
+    //
+    bool randomMode;
 
 };
 

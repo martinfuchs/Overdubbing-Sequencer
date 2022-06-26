@@ -22,6 +22,7 @@ class States
             MENU1_OUTPUT,
             MENU1_CHANNEL,
             MENU1_SEQUENCE,
+            MENU1_RANDOM,
             //MENU1_NOTES,
             MENU1_END
         };

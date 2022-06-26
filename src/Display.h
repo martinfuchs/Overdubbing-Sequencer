@@ -19,8 +19,11 @@ class Display
         void renderChannelSelect(States* states);
         void renderMenu1Selection(States* states);
         void renderFrameSegment(int** _frame, int resx, int resy, int posx, int posy);
+        void renderRandomState(bool enabled);
 
         void writeFrame();
+
+
     
     private:
         void setup();

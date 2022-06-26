@@ -182,7 +182,11 @@ void Channel::triggerClock(){
 
 
 void Channel::nextSequenceIndex(){
-    activePlayingSequenceIndex++;
+    if(randomMode){
+        activePlayingSequenceIndex+=random(0,4);
+    }else{
+        activePlayingSequenceIndex++;
+    }
     if(activePlayingSequenceIndex>numSequences-1){
         activePlayingSequenceIndex = 0;
     }
@@ -236,6 +240,15 @@ uint8_t Channel::getNumNotesPerSequence(){
 
 ustd::array<SequenceV2*> Channel::getSequences(){
     return sequences;
+}
+
+
+bool Channel::getRandomMode(){
+    return randomMode;
+}
+
+void Channel::setRandomMode(bool value){
+    randomMode = value;
 }
 
 

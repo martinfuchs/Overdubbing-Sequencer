@@ -85,6 +85,16 @@ void Display::renderFrameSegment(int** _frame, int resx, int resy, int posx, int
 }
 
 
+void Display::renderRandomState(bool enabled){
+  if(enabled){
+    addDotOnPosition(0,4);
+    addDotOnPosition(1,4);
+  }else{
+    addDotOnPosition(0,4);
+  }
+}
+
+
 void Display::renderState(States* states){
   int icon;
   if(states->getMainState()==States::MAIN_PLAY){

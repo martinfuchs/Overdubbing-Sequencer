@@ -267,6 +267,7 @@ void updateDisplayLayer1(){
       display.renderChannelSelect(&states);
       display.renderFrameSegment(getSelectedChannel()->getFrameDisplay(),5,4,5,3);
       display.renderFrameSegment(getSelectedChannel()->getSequencesDisplay(),5,2,5,0);
+      display.renderRandomState(getSelectedChannel()->getRandomMode());
 
     }else if(states.getMainState() == States::MAIN_NOTEEDIT){ //-------------------------> MAIN_NOTEEDIT
       display.renderFrameSegment(noteValues.getNoteDisplay(),5,7,5,0);
@@ -287,6 +288,8 @@ void updateDisplayLayer2(){
       display.renderMenu1Selection(&states);
       if(states.getMenu1State() == States::MENU1_SEQUENCE){
         display.renderFrameSegment(getSelectedChannel()->getFrameDisplay(),5,4,5,3);
+      }else if(states.getMenu1State() == States::MENU1_RANDOM){
+        display.renderRandomState(getSelectedChannel()->getRandomMode());
       }
     }
 
@@ -385,6 +388,8 @@ void button1Released(){
       }
       getSelectedChannel()->setAutoRecording(true);
 
+    }else if(states.getMenu1State() == States::MENU1_RANDOM){
+      getSelectedChannel()->setRandomMode(!getSelectedChannel()->getRandomMode());
     }
   }else if(states.getMainState()==States::MAIN_NOTEEDIT){ //-------------------------> MAIN_NOTEEDIT
     noteValues.toggleAddStep();
