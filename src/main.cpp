@@ -44,6 +44,8 @@ uint8_t Led2_Pin = 8;
 // BUTTONS
 PButton button1(5);
 PButton button2(7);
+bool button1Down;
+bool button2Down;
 
 // CLOCK/RESET
 uint8_t Clock_Pin = 21;
@@ -140,7 +142,7 @@ void setup(){
 
   // SEQUENCER
   //int _type, uint8_t _numSequences, uint8_t _numNotesPerSequences, bool _usePressure, bool _debug
-  channel1.setup(0, 10, 20, false, false);
+  channel1.setup(0, 10, 20, false, true);
   channel2.setup(1, 5, 20, false, false);
   channel3.setup(2, 5, 5, true, false);
 
@@ -349,6 +351,19 @@ void updateDAC(){
 // BUTTONS
 ///////////////////////////////////
 
+void button1Pressed(){
+  if(states.getMenu1State()==States::MENU1_SEQUENCE){
+    // if sequence is empty
+    if(getSelectedChannel()->isSequenceEnabled(states.getCurrentSelectedSequence())==false){
+      // enable without playback
+      getSelectedChannel()->enableSequence(states.getCurrentSelectedSequence(), false);
+    }
+    // start recording on channel while pressed
+    getSelectedChannel()->setRecordingSequence(states.getCurrentSelectedSequence());
+    getSelectedChannel()->setAutoRecording(false);
+  }
+}
+
 void button1Released(){
   if(states.getMainState()==States::MAIN_PLAY){ //-------------------------> MAIN_PLAY
     if(states.getMenu1State()==States::MENU1_RECORD){
@@ -359,17 +374,26 @@ void button1Released(){
     }else if(states.getMenu1State()==States::MENU1_OUTPUT){
       states.selectNextVout();
     }else if(states.getMenu1State()==States::MENU1_SEQUENCE){
-      if(getSelectedChannel()->isSequenceEnabled(states.getCurrentSelectedSequence())==false){
-        getSelectedChannel()->enableSequence(states.getCurrentSelectedSequence());
+
+      // if sequence is not playing
+      if(getSelectedChannel()->isSequencePlaying(states.getCurrentSelectedSequence())==false){
+        // start playback
+        getSelectedChannel()->playSequence(states.getCurrentSelectedSequence());
       }else{
+        // trigger = activate play for next clock trigger
         getSelectedChannel()->triggerSequence(states.getCurrentSelectedSequence());
       }
+      getSelectedChannel()->setAutoRecording(true);
+
     }
   }else if(states.getMainState()==States::MAIN_NOTEEDIT){ //-------------------------> MAIN_NOTEEDIT
     noteValues.toggleAddStep();
   }else if(states.getMainState()==States::MAIN_SAVE){ //-------------------------> MAIN_SAVE
     loadAll();
   }
+}
+
+void button2Pressed(){
 }
 
 void button2Released(){
@@ -387,7 +411,7 @@ void button2Released(){
     // SHORT PRESSED
     if(states.getMainState()==States::MAIN_PLAY){ //-------------------------> MAIN_PLAY
       if(states.getMenu1State()==States::MENU1_SEQUENCE){
-        getSelectedChannel()->undo();
+        getSelectedChannel()->undo(states.getCurrentSelectedSequence());
       }
     }else if(states.getMainState()==States::MAIN_NOTEEDIT){ //-------------------------> MAIN_NOTEEDIT
       noteValues.saveSelectedNote();
@@ -461,15 +485,28 @@ void loop(){
 
   // BUTTONS 
   if (button1.toggled()) {
-    Serial.println(FreeMem());
+      
+      // print memory
+      Serial.println(FreeMem());
+
       if (button1.read() == PButton::RELEASED){
+        button1Down = false;
         button1Released();
+      }
+      if (button1.read() == PButton::PRESSED){
+        button1Down = true;
+        button1Pressed();
       }
   }
 
   if (button2.toggled()) {
       if (button2.read() == PButton::RELEASED){
+        button2Down = false;
         button2Released();
+      }
+      if (button2.read() == PButton::PRESSED){
+        button2Down = true;
+        button2Pressed();
       }
   }
 

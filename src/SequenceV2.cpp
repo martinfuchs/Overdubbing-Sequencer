@@ -98,8 +98,11 @@ void SequenceV2::stopPendingInputs(){
 ///////////////////
 
 void SequenceV2::update(){
-    if(playing==false || enabled==false){
+    if(playing==false){
         sequenceOutputValue = 0;
+    }
+    
+    if(enabled==false){
         return;
     }
 
@@ -121,6 +124,7 @@ void SequenceV2::update(){
 
 void SequenceV2::startNoteRecord(TouchPads::Touch* touch){
     __debugPrint("Start note record");
+    __debugPrint(roundedTime);
     increaseCurrentNoteIndex();
     NoteV2* newNote = noteArray[currentNoteIndex];
     newNote->reset();
@@ -131,6 +135,7 @@ void SequenceV2::startNoteRecord(TouchPads::Touch* touch){
 
 void SequenceV2::endNoteRecord(TouchPads::Touch* touch){
     __debugPrint("End note record");
+    __debugPrint(roundedTime);
     NoteV2* pending = pendingInputNotes[touch->touchPadId];
     pending->endRecord(roundedTime);
 }
@@ -175,7 +180,7 @@ void SequenceV2::endLiveOutput(TouchPads::Touch* touch){
 ///////////////////
 
 void SequenceV2::restart(){
-    __debugPrint("reset");
+    //__debugPrint("reset");
     startTime = millis();
 }
 
@@ -184,12 +189,16 @@ void SequenceV2::play(){
     playing = true;
 }
 
+bool SequenceV2::getPlaying(){
+    return playing;
+}
 
 void SequenceV2::stop(){
      playing = false;
 }
 
 void SequenceV2::setEnabled(bool value){
+    playing = false;
     enabled = value;
 }
 
@@ -213,7 +222,7 @@ void SequenceV2::undo(){
         NoteV2* n = noteArray[currentNoteIndex];
         n->reset();
     }
-    __debugPrint("undo");
+    //__debugPrint("undo");
 
     currentNoteIndex-=1;
     if(currentNoteIndex<-1){ 

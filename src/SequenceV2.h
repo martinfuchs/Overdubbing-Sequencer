@@ -32,6 +32,8 @@ class SequenceV2
     void setEnabled(bool value);
     bool getEnabled();
 
+    bool getPlaying();
+
     void clearAll();
     void undo();
 

@@ -26,7 +26,7 @@ public:
   void setNoteValueRef(NoteValues *notevalues);
   void updateFromTouchInput(Array<TouchPads::Touch*,NUM_TOUCHPADS> touches, bool record);
   void clearAll();
-  void undo();
+  void undo(int sequenceIndex);
   void triggerClock();
   void resetClock();
   int** getFrameDisplay();
@@ -34,7 +34,11 @@ public:
   void triggerSequence(int sequenceIndex);
 
   //
-  void enableSequence(int index);
+  void enableSequence(int index, bool play=true);
+  void playSequence(int index);
+  bool isSequencePlaying(int index);
+  void setRecordingSequence(int index);
+  void setAutoRecording(bool value);
   void disableSequence(int index);
   bool isSequenceEnabled(int index);
 
@@ -55,10 +59,13 @@ private:
     // SEQUENCES
     void setupEmptySequences();
     void setupSequencesDisplay();
-    SequenceV2* getActiveSequence();
+    SequenceV2* getActivePlayingSequence();
+    SequenceV2* getActiveRecordingSequence();
     uint8_t type = TYPE_NONE;
 
-    uint8_t activeSequenceIndex = 0;
+    uint8_t activePlayingSequenceIndex = 0;
+    uint8_t activeRecordingSequenceIndex = 0;
+
 
     uint8_t numSequences;
     ustd::array<SequenceV2*> sequences;
@@ -68,6 +75,7 @@ private:
     bool usePressure = false;
     bool debug = false;
 
+    bool autoRecording = true;
 
     // GATES
     uint8_t Gate1_Pin = 15;

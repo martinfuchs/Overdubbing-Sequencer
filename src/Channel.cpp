@@ -27,8 +27,12 @@ void Channel::setup(int _type, uint8_t _numSequences, uint8_t _numNotesPerSequen
 }
 
 
-SequenceV2* Channel::getActiveSequence(){
-    return sequences[activeSequenceIndex];
+SequenceV2* Channel::getActivePlayingSequence(){
+    return sequences[activePlayingSequenceIndex];
+}
+
+SequenceV2* Channel::getActiveRecordingSequence(){
+    return sequences[activeRecordingSequenceIndex];
 }
 
 
@@ -42,10 +46,28 @@ void Channel::setupEmptySequences(){
     }
 }
 
-void Channel::enableSequence(int index){
+void Channel::playSequence(int index){
+    SequenceV2* sequence = sequences[index];
+    sequence->play();
+}
+
+bool Channel::isSequencePlaying(int index){
+    SequenceV2* sequence = sequences[index];
+    return sequence->getPlaying();
+}
+
+void Channel::setRecordingSequence(int index){
+    activeRecordingSequenceIndex = index;
+}
+
+void Channel::setAutoRecording(bool value){
+    autoRecording = value;
+}
+
+void Channel::enableSequence(int index, bool play){
     SequenceV2* sequence = sequences[index];
     sequence->setEnabled(true);
-    sequence->play();
+    if(play) sequence->play();
 }
 
 void Channel::disableSequence(int index){
@@ -65,11 +87,26 @@ bool Channel::isSequenceEnabled(int index){
 }
 
 
-
 void Channel::update(){
-    getActiveSequence()->update();
 
-    uint8_t output = getActiveSequence()->getOutputValue();
+    if(autoRecording){
+        activeRecordingSequenceIndex = activePlayingSequenceIndex;
+    }
+
+    getActivePlayingSequence()->update();
+    if(activePlayingSequenceIndex!=activeRecordingSequenceIndex){
+        getActiveRecordingSequence()->update();
+    }
+
+    uint8_t output = getActivePlayingSequence()->getOutputValue();
+    uint8_t second_output = 0;
+    if(activePlayingSequenceIndex!=activeRecordingSequenceIndex){
+        second_output = getActiveRecordingSequence()->getOutputValue();
+    }
+    if(second_output>output){
+        output = second_output;
+    }
+
     if(type==TYPE_GATE1){
         if(output==255){
             digitalWrite(Gate1_Pin, HIGH);
@@ -98,43 +135,56 @@ void Channel::setNoteValueRef(NoteValues *notevalues){
 }
 
 void Channel::updateFromTouchInput(Array<TouchPads::Touch*,NUM_TOUCHPADS> touches, bool record){
-    getActiveSequence()->setTouchInputs(touches,record);
+    getActiveRecordingSequence()->setTouchInputs(touches,record);
 }
 
 
 void Channel::clearAll(){
-    getActiveSequence()->clearAll();
+    getActivePlayingSequence()->clearAll();
 }
 
 
-void Channel::undo(){
-    getActiveSequence()->undo();
+void Channel::undo(int sequenceIndex){
+    // if(sequenceIndex<=0 || sequenceIndex>numSequences-1){
+    //     return;
+    // }
+
+    SequenceV2* sequence = sequences[sequenceIndex];
+    sequence->undo();
+    //getActiveRecordingSequence()->undo();
 }
 
 
 void Channel::resetClock(){
-    getActiveSequence()->restart();
+    getActivePlayingSequence()->restart();
+    if(activePlayingSequenceIndex!=activeRecordingSequenceIndex){
+        getActiveRecordingSequence()->restart();
+    }
 }
 
 
 void Channel::triggerSequence(int sequenceIndex){
-    //getActiveSequence()->stopPendingInputs();
-    activeSequenceIndex = sequenceIndex;
-    //getActiveSequence()->restart();
+    //getActivePlayingSequence()->stopPendingInputs();
+    activePlayingSequenceIndex = sequenceIndex;
+    //getActivePlayingSequence()->restart();
 }
 
 
 void Channel::triggerClock(){
-    getActiveSequence()->stopPendingInputs();
+    getActiveRecordingSequence()->stopPendingInputs();
     nextSequence();
-    getActiveSequence()->restart();
+
+    getActivePlayingSequence()->restart();
+    if(activePlayingSequenceIndex!=activeRecordingSequenceIndex){
+        getActiveRecordingSequence()->restart();
+    }
 }
 
 
 void Channel::nextSequenceIndex(){
-    activeSequenceIndex++;
-    if(activeSequenceIndex>numSequences-1){
-        activeSequenceIndex = 0;
+    activePlayingSequenceIndex++;
+    if(activePlayingSequenceIndex>numSequences-1){
+        activePlayingSequenceIndex = 0;
     }
 }
 
@@ -142,26 +192,37 @@ void Channel::nextSequenceIndex(){
 void Channel::nextSequence(){
     // -> todo: use disabled sequences as gap
     nextSequenceIndex();
-    while(getActiveSequence()->getEnabled()==false){
+    while(getActivePlayingSequence()->getEnabled()==false || getActivePlayingSequence()->getPlaying()==false){
         nextSequenceIndex();
     }
 }
 
 // void Channel::prevSequence(){
-//     activeSequenceIndex--;
-//     if(activeSequenceIndex<0){
-//         activeSequenceIndex = numSequences-1;
+//     activePlayingSequenceIndex--;
+//     if(activePlayingSequenceIndex<0){
+//         activePlayingSequenceIndex = numSequences-1;
 //     }
 // }
 
 
 int** Channel::getFrameDisplay(){
-    return getActiveSequence()->getFrameDisplay();
+    return getActivePlayingSequence()->getFrameDisplay();
 }
 
 
 int Channel::getActiveNoteValue(){
-    return getActiveSequence()->getActiveNoteValue();
+
+    uint8_t output = getActivePlayingSequence()->getOutputValue();
+    uint8_t second_output = 0;
+    if(activePlayingSequenceIndex!=activeRecordingSequenceIndex){
+        second_output = getActiveRecordingSequence()->getOutputValue();
+    }
+
+    int noteValue = getActivePlayingSequence()->getActiveNoteValue();
+    if(second_output!=0 && second_output>=output){
+        noteValue = getActiveRecordingSequence()->getActiveNoteValue();
+    }
+    return noteValue;
 }
 
 
@@ -199,7 +260,7 @@ int** Channel::getSequencesDisplay(){
                 if(sequences[sequenceIndex]->getEnabled()){
                     frame[y][x] = 1;
 
-                    if(sequenceIndex == activeSequenceIndex){
+                    if(sequenceIndex == activePlayingSequenceIndex){
                         blinkCounter += blinkSpeed;
                         if(blinkCounter>20){
                             frame[y][x] = 0;
