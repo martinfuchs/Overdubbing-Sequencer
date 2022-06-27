@@ -98,7 +98,7 @@ void SequenceV2::stopPendingInputs(){
 ///////////////////
 
 void SequenceV2::update(){
-    if(playing==false){
+    if(muted){
         sequenceOutputValue = 0;
     }
     
@@ -185,20 +185,20 @@ void SequenceV2::restart(){
 }
 
 
-void SequenceV2::play(){
-    playing = true;
+void SequenceV2::unmute(){
+    muted = false;
 }
 
-bool SequenceV2::getPlaying(){
-    return playing;
+bool SequenceV2::getMuted(){
+    return muted;
 }
 
-void SequenceV2::stop(){
-     playing = false;
+void SequenceV2::mute(){
+     muted = true;
 }
 
 void SequenceV2::setEnabled(bool value){
-    playing = false;
+    muted = true;
     enabled = value;
 }
 

@@ -25,14 +25,14 @@ class SequenceV2
     void setTouchInputs(Array<TouchPads::Touch*,NUM_TOUCHPADS> touches, bool record);
     void stopPendingInputs();
 
-    void play();
-    void stop();
+    void unmute();
+    void mute();
     void restart();
 
     void setEnabled(bool value);
     bool getEnabled();
 
-    bool getPlaying();
+    bool getMuted();
 
     void clearAll();
     void undo();
@@ -93,7 +93,7 @@ class SequenceV2
     uint16_t sequenceOutputNoteValue = 0;
 
     // PLAYBACK
-    boolean playing = false;
+    boolean muted = true;
     boolean recording = false;
     boolean handsOn = false;
 

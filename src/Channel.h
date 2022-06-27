@@ -35,8 +35,8 @@ public:
 
   //
   void enableSequence(int index, bool play=true);
-  void playSequence(int index);
-  bool isSequencePlaying(int index);
+  void unmuteSequence(int index);
+  bool isSequenceMuted(int index);
   void setRecordingSequence(int index);
   void setAutoRecording(bool value);
   void disableSequence(int index);
@@ -54,6 +54,9 @@ public:
   bool getRandomMode();
   void setRandomMode(bool value);
 
+  //
+  ustd::array<NoteV2*> getNoteArray(int sequenceIndex);
+  void setNoteArray(int sequenceIndex, ustd::array<NoteV2*> noteArray);
   
 private:
     // TIMER

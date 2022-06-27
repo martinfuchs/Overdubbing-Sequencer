@@ -8,6 +8,8 @@
 #include <NoteValues.h>
 #include <SaveHandler.h>
 #include "DAC16.h"
+#include <ustd_array.h>
+
 
 // STATES
 States states;
@@ -83,6 +85,10 @@ NoteValues noteValues;
 
 // EEPROM, SAVEHANDLER
 SaveHandler saveHandler;
+
+// CLIPBOARD
+ustd::array<NoteV2*> clipboardNoteArray;
+bool hasClipboard = false;
 
 
 
@@ -203,7 +209,18 @@ void updateClickEncoderButtonState()
     case Button::Clicked:
         selectMainState = false;
         if(states.getMainState()==States::MAIN_PLAY){
-          states.setRecording(!states.getRecording());
+          if(states.getMenu1State()==States::MENU1_SEQUENCE){
+            if(getSelectedChannel()->isSequenceEnabled(states.getCurrentSelectedSequence())){
+              Serial.println("Copy");
+              hasClipboard = true;
+              clipboardNoteArray = getSelectedChannel()->getNoteArray(states.getCurrentSelectedSequence());
+            }else if(hasClipboard){
+              Serial.println("Paste");
+              getSelectedChannel()->setNoteArray(states.getCurrentSelectedSequence(),clipboardNoteArray);
+            }
+          }else{
+            states.setRecording(!states.getRecording());
+          }
         }
         Serial.println("Button clicked");
         break;
@@ -361,9 +378,9 @@ void button1Pressed(){
       // enable without playback
       getSelectedChannel()->enableSequence(states.getCurrentSelectedSequence(), false);
     }
-    // start recording on channel while pressed
-    getSelectedChannel()->setRecordingSequence(states.getCurrentSelectedSequence());
+    // start recording while pressed
     getSelectedChannel()->setAutoRecording(false);
+    getSelectedChannel()->setRecordingSequence(states.getCurrentSelectedSequence());
   }
 }
 
@@ -378,12 +395,10 @@ void button1Released(){
       states.selectNextVout();
     }else if(states.getMenu1State()==States::MENU1_SEQUENCE){
 
-      // if sequence is not playing
-      if(getSelectedChannel()->isSequencePlaying(states.getCurrentSelectedSequence())==false){
-        // start playback
-        getSelectedChannel()->playSequence(states.getCurrentSelectedSequence());
+      if(getSelectedChannel()->isSequenceMuted(states.getCurrentSelectedSequence())){
+        getSelectedChannel()->unmuteSequence(states.getCurrentSelectedSequence());
       }else{
-        // trigger = activate play for next clock trigger
+        // activate play for next clock trigger
         getSelectedChannel()->triggerSequence(states.getCurrentSelectedSequence());
       }
       getSelectedChannel()->setAutoRecording(true);

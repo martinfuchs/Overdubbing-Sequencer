@@ -46,14 +46,14 @@ void Channel::setupEmptySequences(){
     }
 }
 
-void Channel::playSequence(int index){
+void Channel::unmuteSequence(int index){
     SequenceV2* sequence = sequences[index];
-    sequence->play();
+    sequence->unmute();
 }
 
-bool Channel::isSequencePlaying(int index){
+bool Channel::isSequenceMuted(int index){
     SequenceV2* sequence = sequences[index];
-    return sequence->getPlaying();
+    return sequence->getMuted();
 }
 
 void Channel::setRecordingSequence(int index){
@@ -64,10 +64,10 @@ void Channel::setAutoRecording(bool value){
     autoRecording = value;
 }
 
-void Channel::enableSequence(int index, bool play){
+void Channel::enableSequence(int index, bool unmute){
     SequenceV2* sequence = sequences[index];
     sequence->setEnabled(true);
-    if(play) sequence->play();
+    if(unmute) sequence->unmute();
 }
 
 void Channel::disableSequence(int index){
@@ -196,7 +196,7 @@ void Channel::nextSequenceIndex(){
 void Channel::nextSequence(){
     // -> todo: use disabled sequences as gap
     nextSequenceIndex();
-    while(getActivePlayingSequence()->getEnabled()==false || getActivePlayingSequence()->getPlaying()==false){
+    while(getActivePlayingSequence()->getEnabled()==false || getActivePlayingSequence()->getMuted()){
         nextSequenceIndex();
     }
 }
@@ -240,6 +240,33 @@ uint8_t Channel::getNumNotesPerSequence(){
 
 ustd::array<SequenceV2*> Channel::getSequences(){
     return sequences;
+}
+
+ustd::array<NoteV2*> Channel::getNoteArray(int sequenceIndex){
+    if(sequenceIndex<0 || sequenceIndex>numSequences-1){
+        Serial.println("Channel.cpp: Get sequence error");
+        return NULL;
+    }
+    return sequences[sequenceIndex]->getNoteArray();
+}
+
+
+void Channel::setNoteArray(int sequenceIndex, ustd::array<NoteV2*> newNoteArray){
+    if(sequenceIndex<0 || sequenceIndex>numSequences-1){
+        Serial.println("Channel.cpp: Set sequence error");
+        return NULL;
+    }
+    SequenceV2* sequence = sequences[sequenceIndex];
+    ustd::array<NoteV2*> noteArray = sequence->getNoteArray();
+    for(uint8_t i = 0; i<numNotesPerSequences; i++){
+        NoteV2 *n = newNoteArray[i];
+        if(n->getDisabled()==false){
+            noteArray[i]->createFromValues(n->getIndex(),n->getPadId(),n->getStartTime(),n->getEndTime());
+            sequence->increaseCurrentNoteIndex();
+        }
+    }
+    sequence->setEnabled(true);
+    sequence->unmute();
 }
 
 

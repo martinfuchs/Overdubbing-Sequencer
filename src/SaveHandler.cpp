@@ -166,7 +166,7 @@ void SaveHandler::loadSequences(char* fileName, ustd::array<SequenceV2*> sequenc
           n->createFromValues(nIndex,nPadId,nStartTime,nEndTime);
           sequence->increaseCurrentNoteIndex();
           sequence->setEnabled(true);
-          sequence->play();
+          sequence->unmute();
         }
       }
 
