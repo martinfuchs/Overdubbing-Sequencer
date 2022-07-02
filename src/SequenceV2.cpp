@@ -289,7 +289,7 @@ int** SequenceV2::getFrameDisplay(){
     for(uint8_t i=0; i<MAX_NOTES_DISPLAY; i++){
         NoteV2 *n = noteArray[i];
         if(i<numNotes){
-            if(roundedTime>n->getStartTime() && roundedTime<n->getEndTime()){
+            if(n->isPlaying()){
                 frame[y][x] = 0;
             }else{
                 frame[y][x] = 1;

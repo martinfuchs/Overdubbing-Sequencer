@@ -42,18 +42,20 @@ class NoteV2
     uint8_t padId = 0;
 
     uint32_t startTime = 0;
-    uint32_t endTime = 0;
+    //uint32_t endTime = 0;
+    uint32_t playbackPosition = 0;
 
-    uint16_t duration = 0;
+    uint16_t durationMillis = 0;
     bool pendingRecord = false;
     bool pendingPlay = false;
+
+    uint16_t lastUpdateTimeMillis = 0;
 
     bool disabled = true;
 
     uint8_t output = 0;
 
     bool usePressure = false;
-    uint16_t lastPressureUpdateTime = 0;
     PressureNote * pNote;
 };
 #endif
