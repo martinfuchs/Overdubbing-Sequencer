@@ -213,7 +213,7 @@ void SequenceV2::clearAll(){
         NoteV2 *n = noteArray[i];
         n->reset();
     }
-    sequenceOutputNoteValue = 0;
+    resetSequenceOutputNoteValue();
 }
 
 
@@ -226,7 +226,7 @@ void SequenceV2::undo(){
     //__debugPrint("undo");
 
     if(currentNoteIndex==0){
-        sequenceOutputNoteValue = 0;
+        resetSequenceOutputNoteValue();
     }
 
     currentNoteIndex-=1;
@@ -258,6 +258,10 @@ uint16_t SequenceV2::getNoteValue(uint8_t padId){
         return 65535; // return lowest value
     }
     return notevalues->getNoteValues()[padId];
+}
+
+void SequenceV2::resetSequenceOutputNoteValue(){
+    sequenceOutputNoteValue = 0;
 }
 
 

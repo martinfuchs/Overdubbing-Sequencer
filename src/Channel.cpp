@@ -194,6 +194,9 @@ void Channel::nextSequenceIndex(){
 
 
 void Channel::nextSequence(){
+    // clear outputNoteValue, has to be 0 for next playback 
+    getActivePlayingSequence()->resetSequenceOutputNoteValue();
+
     // -> todo: use disabled sequences as gap
     nextSequenceIndex();
     while(getActivePlayingSequence()->getEnabled()==false || getActivePlayingSequence()->getMuted()){

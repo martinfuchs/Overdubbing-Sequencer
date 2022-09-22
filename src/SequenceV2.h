@@ -39,6 +39,7 @@ class SequenceV2
 
     void setNoteValueRef(NoteValues *notevalues);
     uint16_t getActiveNoteValue(); // NOTE VALUE FOR DAC
+    void resetSequenceOutputNoteValue();
 
     void increaseCurrentNoteIndex();
 
