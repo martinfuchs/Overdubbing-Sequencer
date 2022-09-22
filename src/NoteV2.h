@@ -20,7 +20,7 @@ class NoteV2
     void recordPressure(uint32_t roundedTime, uint8_t pressure);
     uint8_t getPressureOutput();
 
-    void createFromValues(uint8_t _index, uint8_t _padId, uint32_t startTime, uint32_t endTime);
+    void createFromValues(uint8_t _index, uint8_t _padId, uint32_t startTime, uint16_t durationMillis);
 
     uint8_t getOutput();
     void setDisabled(bool value);
@@ -28,7 +28,9 @@ class NoteV2
     uint8_t getIndex();
     uint8_t getPadId();
     uint8_t getStartTime();
-    uint8_t getEndTime();
+
+    void setDurationMillis(uint16_t _durationMillis);
+    uint16_t getDurationMillis();
 
     bool isPlaying();
 

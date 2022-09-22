@@ -39,8 +39,17 @@ uint8_t NoteV2::getStartTime(){
 }
 
 
-uint8_t NoteV2::getEndTime(){
-    return startTime+durationMillis*0.1; //*0.1 => rounded time
+// uint8_t NoteV2::getEndTime(){
+//     return startTime+durationMillis*0.1; //*0.1 => rounded time
+// }
+
+
+uint16_t NoteV2::getDurationMillis(){
+    return durationMillis;
+}
+
+void NoteV2::setDurationMillis(uint16_t _durationMillis){
+    durationMillis = _durationMillis;
 }
 
 
@@ -116,13 +125,13 @@ void NoteV2::update(uint32_t roundedTime){
 }
 
 
-void NoteV2::createFromValues(uint8_t _index, uint8_t _padId, uint32_t _startTime, uint32_t _endTime){
+void NoteV2::createFromValues(uint8_t _index, uint8_t _padId, uint32_t _startTime,  uint16_t _durationMillis){
     reset();
     setDisabled(false);
     index = _index;
     padId = _padId;
     startTime = _startTime;
-    //endTime = _endTime;
+    durationMillis = _durationMillis;
 }
 
 
@@ -138,7 +147,6 @@ void NoteV2::startRecord(uint32_t roundedTime, uint8_t _index, uint8_t _padId){
 
     durationMillis = 0;
     lastUpdateTimeMillis = millis();
-    Serial.println("clear duration");
     pendingRecord = true;
     startTime = roundedTime;
     startPlay();

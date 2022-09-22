@@ -42,7 +42,7 @@ void SaveHandler::saveSequences(char* fileName, ustd::array<SequenceV2*> sequenc
         String saveString = "-1,0,0,0";
         if(n->getDisabled()==false){
           // uint8_t, uint8_t, uint32_t, uint32_t
-          saveString = String(n->getIndex())+","+String(n->getPadId())+","+String(n->getStartTime())+","+String(n->getEndTime());
+          saveString = String(n->getIndex())+","+String(n->getPadId())+","+String(n->getStartTime())+","+String(n->getDurationMillis());
         }
         file.print(saveString+"\r\n");
       }
@@ -98,7 +98,7 @@ void SaveHandler::loadSequences(char* fileName, ustd::array<SequenceV2*> sequenc
       int nIndex = -1;
       uint8_t nPadId = 0;
       uint32_t nStartTime = 0;
-      uint32_t nEndTime = 0;
+      uint16_t nDurationMillis = 0;
       //
       char *p = line;
       char *str;
@@ -136,7 +136,7 @@ void SaveHandler::loadSequences(char* fileName, ustd::array<SequenceV2*> sequenc
           }else if(charIndex==2){
             nStartTime = String(str).toInt();
           }else if(charIndex==3){
-            nEndTime = String(str).toInt();
+            nDurationMillis = String(str).toInt();
           }
         }
         charIndex+=1;
@@ -153,17 +153,21 @@ void SaveHandler::loadSequences(char* fileName, ustd::array<SequenceV2*> sequenc
 
           Serial.print("NOTE:");
           Serial.println(nCount);
+          Serial.print("Index:");
           Serial.println(nIndex);
+          Serial.print("PadId:");
           Serial.println(nPadId);
+          Serial.print("StartTime:");
           Serial.println(nStartTime);
-          Serial.println(nEndTime);
+          Serial.print("DurationMillis:");
+          Serial.println(nDurationMillis);
           Serial.println("+++++++++++++++++++");
           Serial.println();
 
           SequenceV2* sequence = sequences[seqCount];
           ustd::array<NoteV2*> noteArray = sequence->getNoteArray();
           NoteV2 *n = noteArray[nCount];
-          n->createFromValues(nIndex,nPadId,nStartTime,nEndTime);
+          n->createFromValues(nIndex,nPadId,nStartTime,nDurationMillis);
           sequence->increaseCurrentNoteIndex();
           sequence->setEnabled(true);
           sequence->unmute();

@@ -104,6 +104,10 @@ void saveAll(){
   saveHandler.saveNotes(0, noteValues.getNoteValues());
 }
 
+void loadNotes(){
+  noteValues.applyNotes(saveHandler.loadNotes(0));
+}
+
 void loadAll(){
   channel1.clearAll();
   channel2.clearAll();
@@ -112,7 +116,7 @@ void loadAll(){
   saveHandler.loadSequences("channel2.csv", channel2.getSequences(), channel2.getNumSequences(), channel2.getNumNotesPerSequence());
   saveHandler.loadSequences("channel3.csv", channel3.getSequences(), channel3.getNumSequences(), channel3.getNumNotesPerSequence());
 
-  noteValues.applyNotes(saveHandler.loadNotes(0));
+  loadNotes();
 }
 
 
@@ -167,8 +171,8 @@ void setup(){
   channel2.enableSequence(0);
   channel3.enableSequence(0);
 
-  // LOAD DEFAULT
-  //loadAll();
+  // LOAD NOTES --> TODO: define default note values? create ui for default values?
+  loadNotes();
 }
 
 ///////////////////////////////////
@@ -199,8 +203,6 @@ Channel* getSelectedVoutChannel(){
 ///////////////////////////////////
 // ROTARY ENCODER
 ///////////////////////////////////
-
-// depending on framerate? sometimes not triggered. do we need an other update handling? or just faster hardware :)
 
 void updateClickEncoderButtonState()
 {

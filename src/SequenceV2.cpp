@@ -213,6 +213,7 @@ void SequenceV2::clearAll(){
         NoteV2 *n = noteArray[i];
         n->reset();
     }
+    sequenceOutputNoteValue = 0;
 }
 
 
@@ -223,6 +224,10 @@ void SequenceV2::undo(){
         n->reset();
     }
     //__debugPrint("undo");
+
+    if(currentNoteIndex==0){
+        sequenceOutputNoteValue = 0;
+    }
 
     currentNoteIndex-=1;
     if(currentNoteIndex<-1){ 
@@ -259,7 +264,7 @@ uint16_t SequenceV2::getNoteValue(uint8_t padId){
 uint16_t SequenceV2::getActiveNoteValue(){
     if(liveOutputValue>0){
         return liveOutputNoteValue;
-    }else{
+    }else if(sequenceOutputNoteValue>0){
         return sequenceOutputNoteValue;
     }
 }

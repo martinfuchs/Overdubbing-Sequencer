@@ -261,7 +261,7 @@ void Channel::setNoteArray(int sequenceIndex, ustd::array<NoteV2*> newNoteArray)
     for(uint8_t i = 0; i<numNotesPerSequences; i++){
         NoteV2 *n = newNoteArray[i];
         if(n->getDisabled()==false){
-            noteArray[i]->createFromValues(n->getIndex(),n->getPadId(),n->getStartTime(),n->getEndTime());
+            noteArray[i]->createFromValues(n->getIndex(),n->getPadId(),n->getStartTime(),n->getDurationMillis());
             sequence->increaseCurrentNoteIndex();
         }
     }
